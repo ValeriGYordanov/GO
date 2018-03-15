@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view='http://schemas.android.com/apk/res-auto'
+    android:orientation="horizontal"
+    android:layout_margin="20dp"
+    card_view:cardCornerRadius="10dp"
+    card_view:cardElevation="20dp"
+    card_view:cardBackgroundColor="@color/colorAccentLight"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/all_spots_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:textColor="@color/colorWhite"
+            android:text="Place"
+            android:textAlignment="center"
+            android:padding="5dp"
+            />
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="45dp"
+            android:src="@drawable/app_logo_pure"
+            android:layout_marginStart="10dp"
+            />
+
+        <ImageView
+            android:id="@+id/delete_spot_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignTop="@+id/all_spots_txt"
+            android:layout_alignBottom="@+id/all_spots_txt"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:src="@android:drawable/ic_delete" />
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>
