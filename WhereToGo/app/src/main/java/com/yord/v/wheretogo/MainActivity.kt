@@ -7,6 +7,8 @@ import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
+import com.daimajia.androidanimations.library.Techniques
+import com.daimajia.androidanimations.library.YoYo
 import com.yord.v.wheretogo.injection.Injection
 import com.yord.v.wheretogo.model.Place
 import com.yord.v.wheretogo.viewmodel.PlaceViewModel
@@ -36,19 +38,39 @@ class MainActivity : AppCompatActivity() {
         where_btn.setOnClickListener {
             val random = Random()
             Log.e("RandomPlaceINT : ", " ".plus(places.count()))
-            if (places.count() == 0){
+            if (places.count() == 0) {
                 Toast.makeText(this, "You haven't inserted anything yet!", LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            val randomPlace = random.nextInt(places.count())
-            place_txt.text = places[randomPlace].placeTitle
-        }
 
+                YoYo.with(Techniques.Tada)
+                        .duration(700)
+                        .repeat(2)
+                        .playOn(textInputLayout)
+
+            } else {
+                val randomPlace = random.nextInt(places.count())
+                place_txt.text = places[randomPlace].placeTitle
+                YoYo.with(Techniques.DropOut)
+                        .duration(500)
+                        .playOn(place_txt)
+                YoYo.with(Techniques.DropOut)
+                        .duration(500)
+                        .playOn(imageView)
+
+            }
+        }
         add_place_btn.setOnClickListener {
             val newPlaceTtl = add_place_txt.text.toString()
             val newPlace = Place(Random().nextLong(),newPlaceTtl)
+            var doesNotExist = true
             if (!newPlaceTtl.isEmpty()){
-                if (!places.contains(newPlace)) {
+                places.forEach { place: Place ->
+                    run {
+                        if (place.placeTitle.equals(newPlaceTtl, true)) {
+                            doesNotExist = false
+                        }
+                    }
+                }
+                if (doesNotExist) {
                     viewModel.addNewPlace(newPlace)
                     places.plus(newPlace)
                     Toast.makeText(this, newPlace.placeTitle + ", added!", LENGTH_SHORT).show()
