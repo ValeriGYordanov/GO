@@ -11,12 +11,13 @@
         android:id="@+id/place_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="20dp"
         android:fontFamily="@font/aclonica"
         android:text="Place"
         android:textAllCaps="false"
         android:textSize="30sp"
         android:textStyle="bold"
+        app:layout_constraintHorizontal_bias="0.17"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
@@ -27,10 +28,10 @@
         android:layout_height="112dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="40dp"
         android:src="@drawable/icon_place"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintHorizontal_bias="0.1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -56,23 +57,23 @@
         android:layout_height="56dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:textAlignment="center"
+        android:layout_marginTop="72dp"
         android:focusableInTouchMode="true"
+        android:textAlignment="center"
         app:hintTextAppearance="@style/TextHint"
-        app:layout_constraintBottom_toTopOf="@+id/where_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/place_txt"
-        app:layout_constraintVertical_bias="0.406">
+        app:layout_constraintHorizontal_bias="0.837"
+        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/add_place_txt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/aclonica"
+            android:hint="Add Place"
             android:maxLines="1"
             android:singleLine="true"
-            android:hint="Add Place"
             android:textAlignment="center"
             android:textColor="@color/colorPrimary" />
     </android.support.design.widget.TextInputLayout>
@@ -91,9 +92,9 @@
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/where_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintHorizontal_bias="0.942"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
-        app:layout_constraintVertical_bias="0.377" />
+        app:layout_constraintVertical_bias="0.437" />
 
 </android.support.constraint.ConstraintLayout>

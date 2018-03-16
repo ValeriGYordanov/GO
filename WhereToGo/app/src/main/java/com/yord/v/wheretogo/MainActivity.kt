@@ -1,9 +1,9 @@
 package com.yord.v.wheretogo
 
 import android.arch.lifecycle.ViewModelProviders
+import android.graphics.Typeface
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
@@ -25,9 +25,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var places: List<Place>
     private val disposable = CompositeDisposable()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        textInputLayout.setTypeface(Typeface.createFromAsset(assets, "fonts/Aclonica.ttf"))
+        place_txt.text = savedInstanceState?.getCharSequence("place")
 
         factory = Injection.provideViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, factory).get(PlaceViewModel::class.java)
@@ -37,7 +40,6 @@ class MainActivity : AppCompatActivity() {
 
         where_btn.setOnClickListener {
             val random = Random()
-            Log.e("RandomPlaceINT : ", " ".plus(places.count()))
             if (places.count() == 0) {
                 Toast.makeText(this, "You haven't inserted anything yet!", LENGTH_SHORT).show()
 
@@ -59,7 +61,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         add_place_btn.setOnClickListener {
-            val newPlaceTtl = add_place_txt.text.toString()
+            val newPlaceTtl = add_place_txt.text.toString().trim()
             val newPlace = Place(Random().nextLong(),newPlaceTtl)
             var doesNotExist = true
             if (!newPlaceTtl.isEmpty()){
@@ -78,9 +80,15 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, newPlace.placeTitle + ", is already in the list. Add new one!", LENGTH_LONG).show()
                 }
             }else{
-                Toast.makeText(this, "Insert a new Place, please!", LENGTH_SHORT).show()
+                Toast.makeText(this, "Type a new Place, please!", LENGTH_SHORT).show()
             }
             add_place_txt.text.clear()
         }
+    }
+
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putCharSequence("place", place_txt.text)
     }
 }

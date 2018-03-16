@@ -1,10 +1,6 @@
 package com.yord.v.wheretogo.viewmodel
 
-import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.ViewModel
-import com.yord.v.wheretogo.db.AppDatabase
 import com.yord.v.wheretogo.model.Place
 import com.yord.v.wheretogo.model.PlaceDao
 import io.reactivex.Flowable
@@ -23,9 +19,41 @@ class PlaceViewModel(private val data: PlaceDao) : ViewModel(){
         return livePlaces
     }
 
+
+
     fun addNewPlace(place: Place){
         data.insertNewPlace(place)
     }
+
+
+//    private var livePlaces: List<Place>? = null
+//    private var disposable = CompositeDisposable()
+//    private var place: Place? = null
+//
+//    fun loadPlaces(): List<Place>?{
+//        if (livePlaces == null) {
+//            disposable.add(data.getAllPlaces().subscribe({livePlaces = it})
+//            )
+//        }
+//        return livePlaces
+//    }
+//
+//    fun showRandomPlace(): String {
+//        if (place == null) {
+//            place = livePlaces!![Random().nextInt(livePlaces!!.count())]
+//        }
+//        return place!!.placeTitle
+//    }
+//
+//    fun addNewPlace(title: String): Boolean{
+//        livePlaces!!.forEach { place ->
+//            if (place.placeTitle.equals(title, true)){
+//                return false
+//            }
+//        }
+//        data.insertNewPlace(Place(Random().nextLong(), title))
+//        return true
+//    }
 
 
 }
