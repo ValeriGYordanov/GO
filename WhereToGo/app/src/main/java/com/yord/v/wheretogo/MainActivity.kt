@@ -1,5 +1,6 @@
 package com.yord.v.wheretogo
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
@@ -53,7 +54,9 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this, factory).get(PlaceViewModel::class.java)
 
         disposable.add(viewModel.loadPlaces()
-        !!.subscribe({ places = it }))
+        !!.subscribe({ places = it
+            place_image.isEnabled = places.count() >= 1
+        }))
 
         where_btn.setOnClickListener {
             val random = Random()
@@ -71,6 +74,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         add_place_btn.setOnClickListener {
+
+            if (permissionNotGranted()) {
+                Toast.makeText(this, "No permission granted", LENGTH_SHORT).show()
+                requestPermission()
+                return@setOnClickListener
+            }
+
             val newPlaceTtl = add_place_txt.text.toString().trim()
             val newPlace = Place(Random().nextLong(), newPlaceTtl, latitude, longitude)
             var placeIsNotInList = true
@@ -103,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         place_image.setOnClickListener { _ -> gotoPlace() }
 
         place_image.setOnLongClickListener { _ ->
-            if (!place_txt.text.isEmpty()) {
+            if (!place_txt.text.isEmpty() || place_txt.text != null) {
                 val alert = AlertDialog.Builder(
                         this)
                 alert.setTitle("Delete Place???")
@@ -138,13 +148,8 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun setUpLocationManager() {
 
-        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION)
-        val permission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (permissionNotGranted()) return
 
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Permission to location denied, please try again!", LENGTH_LONG).show()
-            return
-        }
         var locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
 
@@ -167,6 +172,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun permissionNotGranted(): Boolean {
+        val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Permission to location denied, please try again!", LENGTH_LONG).show()
+            requestPermission()
+            return true
+        }
+        return false
+    }
+
+    private fun requestPermission(){
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION)
     }
 
     /*
