@@ -1,6 +1,8 @@
 package com.yord.v.wheretogo.viewmodel
 
 import android.arch.lifecycle.ViewModel
+import android.support.v4.app.ActivityCompat
+import com.yord.v.wheretogo.MainActivity
 import com.yord.v.wheretogo.model.Place
 import com.yord.v.wheretogo.model.PlaceDao
 import io.reactivex.Flowable
@@ -10,9 +12,9 @@ import io.reactivex.Flowable
  */
 class PlaceViewModel(private val data: PlaceDao) : ViewModel(){
 
-    private var livePlaces: Flowable<List<Place>>? = null
+    private var livePlaces: Flowable<MutableList<Place>>? = null
 
-    fun loadPlaces(): Flowable<List<Place>>?{
+    fun loadPlaces(): Flowable<MutableList<Place>>?{
         if (livePlaces == null) {
             livePlaces = data.getAllPlaces()
         }
@@ -25,35 +27,9 @@ class PlaceViewModel(private val data: PlaceDao) : ViewModel(){
         data.insertNewPlace(place)
     }
 
-
-//    private var livePlaces: List<Place>? = null
-//    private var disposable = CompositeDisposable()
-//    private var place: Place? = null
-//
-//    fun loadPlaces(): List<Place>?{
-//        if (livePlaces == null) {
-//            disposable.add(data.getAllPlaces().subscribe({livePlaces = it})
-//            )
-//        }
-//        return livePlaces
-//    }
-//
-//    fun showRandomPlace(): String {
-//        if (place == null) {
-//            place = livePlaces!![Random().nextInt(livePlaces!!.count())]
-//        }
-//        return place!!.placeTitle
-//    }
-//
-//    fun addNewPlace(title: String): Boolean{
-//        livePlaces!!.forEach { place ->
-//            if (place.placeTitle.equals(title, true)){
-//                return false
-//            }
-//        }
-//        data.insertNewPlace(Place(Random().nextLong(), title))
-//        return true
-//    }
+    fun deletePlace(place: Place){
+        data.deletePlace(place)
+    }
 
 
 }

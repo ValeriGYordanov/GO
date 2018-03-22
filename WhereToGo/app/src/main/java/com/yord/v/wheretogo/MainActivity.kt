@@ -14,6 +14,8 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
+import android.view.View
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
@@ -34,13 +36,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var factory: ViewModelFactory
     private lateinit var viewModel: PlaceViewModel
 
-    private lateinit var places: List<Place>
+    private lateinit var places: MutableList<Place>
     private lateinit var currentPlace: Place
     private val disposable = CompositeDisposable()
 
     private var latitude = ""
     private var longitude = ""
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +60,7 @@ class MainActivity : AppCompatActivity() {
             setUpLocationManager()
             if (places.count() == 0) {
                 Toast.makeText(this, "You haven't inserted anything yet!", LENGTH_SHORT).show()
-                errorEmptyOutputAnimation()
+                errorEmptyOutputAnimation(textInputLayout)
 
             } else {
                 val randomPlace = random.nextInt(places.count())
@@ -91,23 +92,56 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 Toast.makeText(this, "Type a Place title, please!", LENGTH_SHORT).show()
-                errorEmptyOutputAnimation()
+                errorEmptyOutputAnimation(textInputLayout)
             }
 
             add_place_txt.text.clear()
+
         }
 
 
         place_image.setOnClickListener { _ -> gotoPlace() }
+
+        place_image.setOnLongClickListener { _ ->
+            if (!place_txt.text.isEmpty()) {
+                val alert = AlertDialog.Builder(
+                        this)
+                alert.setTitle("Delete Place???")
+                alert.setIcon(android.R.drawable.ic_delete)
+                alert.setMessage("Are you sure you want to delete : " + currentPlace.placeTitle)
+                alert.setPositiveButton("Yes", { _, _ ->
+                    var idx = places.indexOf(currentPlace)
+                    places.removeAt(idx)
+                    viewModel.deletePlace(currentPlace)
+                    Toast.makeText(this, "Place removed", LENGTH_SHORT).show()
+                    place_txt.text = ""
+                })
+                alert.setNegativeButton("No", { dialog, _ ->
+                    dialog.dismiss()
+                })
+                alert.show()
+                true
+            } else {
+                Toast.makeText(this, "No place selected...", LENGTH_SHORT).show()
+                errorEmptyOutputAnimation(place_image)
+                true
+            }
+        }
+
     }
 
+    /*
+     * Sets up the location manager
+     * and listens for location changes so
+     * it can update the latitude and longitude
+     */
     @SuppressLint("MissingPermission")
     private fun setUpLocationManager() {
 
         ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION)
         val permission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
 
-        if (permission != PackageManager.PERMISSION_GRANTED){
+        if (permission != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Permission to location denied, please try again!", LENGTH_LONG).show()
             return
         }
@@ -116,15 +150,13 @@ class MainActivity : AppCompatActivity() {
 
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Toast.makeText(this, "NO LOCATION =X", LENGTH_LONG).show()
-        }
-        else {
+        } else {
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission
                     (this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
                 ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION)
-            }
-            else {
+            } else {
                 val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
                 if (location != null) {
                     val lati = location.latitude
@@ -172,11 +204,11 @@ class MainActivity : AppCompatActivity() {
     /*
      * Handles View's animations
      */
-    private fun errorEmptyOutputAnimation() {
+    private fun errorEmptyOutputAnimation(target: View) {
         YoYo.with(Techniques.Tada)
                 .duration(700)
                 .repeat(2)
-                .playOn(textInputLayout)
+                .playOn(target)
     }
     private fun placeAnimation() {
         YoYo.with(Techniques.DropOut)
