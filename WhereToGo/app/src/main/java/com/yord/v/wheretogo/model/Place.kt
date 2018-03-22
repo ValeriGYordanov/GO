@@ -15,5 +15,9 @@ data class Place(
         @ColumnInfo(name = "id")
         val id: Long,
         @ColumnInfo(name = "title")
-        var placeTitle: String
+        var placeTitle: String,
+        @ColumnInfo(name = "latitude")
+        var latitude: String,
+        @ColumnInfo(name = "longitude")
+        var longitude: String
 )

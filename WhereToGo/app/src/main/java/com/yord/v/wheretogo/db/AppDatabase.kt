@@ -10,7 +10,7 @@ import com.yord.v.wheretogo.model.PlaceDao
 /**
  * Created by Valery on 3/15/2018.
  */
-@Database(entities = arrayOf(Place::class), version = 3, exportSchema = false)
+@Database(entities = arrayOf(Place::class), version = 4, exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {
 
     abstract fun placeDao(): PlaceDao
