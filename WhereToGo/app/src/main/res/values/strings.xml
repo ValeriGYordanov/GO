@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">WhereToGO</string>
     <string name="delete_dialog_title">Delete Place???</string>
-    <string name="delete_dialog_text">Are you sure you want to delete :</string>
+    <string name="delete_dialog_text">Are you sure you want to delete : </string>
     <string name="possitive">Yes</string>
     <string name="negative">No</string>
     <string name="delete_dialog_success">Place removed</string>

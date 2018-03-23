@@ -4,14 +4,21 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'kotlin-kapt'
+
 
 android {
     signingConfigs {
         config {
-            keyAlias 'wtgkeystore'
-            keyPassword 'debelnosorog1'
-            storeFile file('D:/keystore/wtg_keystore/wheretogo.jks')
-            storePassword 'debelnosorog1'
+            try {
+                keyAlias 'wtgkeystore'
+                keyPassword KEY_PASSWORD
+                storeFile file('D:/keystore/wtg_keystore/wheretogo.jks')
+                storePassword KEYSTORE_PASSWORD
+            }
+            catch(ex){
+                throw new InvalidUserDataException("Missing infor in gradle.properties")
+            }
         }
     }
     compileSdkVersion 26
@@ -33,7 +40,7 @@ android {
     kapt {
         generateStubs = true
     }
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '26.0.2'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
         targetCompatibility JavaVersion.VERSION_1_6
@@ -62,6 +69,7 @@ dependencies {
     // ReactiveX
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
     implementation 'io.reactivex.rxjava2:rxjava:2.1.10'
+    compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar'
     // ViewAnimations
     compile 'com.daimajia.easing:library:2.0@aar'
     compile 'com.daimajia.androidanimations:library:2.3@aar'

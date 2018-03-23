@@ -13,6 +13,7 @@ import io.reactivex.Flowable
 class PlaceViewModel(private val data: PlaceDao) : ViewModel(){
 
     private var livePlaces: Flowable<MutableList<Place>>? = null
+    private lateinit var currentPlace: Place
 
     fun loadPlaces(): Flowable<MutableList<Place>>?{
         if (livePlaces == null) {
@@ -29,6 +30,14 @@ class PlaceViewModel(private val data: PlaceDao) : ViewModel(){
 
     fun deletePlace(place: Place){
         data.deletePlace(place)
+    }
+
+    fun showCurrentPlace(): Place{
+        return currentPlace
+    }
+
+    fun assignCurrentPlace(currentPlace: Place){
+        this.currentPlace = currentPlace
     }
 
 

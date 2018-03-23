@@ -24,23 +24,23 @@ import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
+import com.tbruyelle.rxpermissions2.RxPermissions
 import com.yord.v.wheretogo.injection.Injection
 import com.yord.v.wheretogo.model.Place
 import com.yord.v.wheretogo.viewmodel.PlaceViewModel
 import com.yord.v.wheretogo.viewmodel.ViewModelFactory
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
+import org.reactivestreams.Subscription
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
-
-    private val REQUEST_LOCATION = 1
+class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListener {
 
     private lateinit var factory: ViewModelFactory
     private lateinit var viewModel: PlaceViewModel
 
     private lateinit var places: MutableList<Place>
-    private lateinit var currentPlace: Place
     private val disposable = CompositeDisposable()
 
     private var latitude = ""
@@ -51,7 +51,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         textInputLayout.setTypeface(Typeface.createFromAsset(assets, getString(R.string.path_fonts)))
         place_txt.text = savedInstanceState?.getCharSequence("place")
-        setUpLocationManager()
+
+        requestPermission()
 
         factory = Injection.provideViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, factory).get(PlaceViewModel::class.java)
@@ -67,20 +68,13 @@ class MainActivity : AppCompatActivity() {
 
             } else {
                 val randomPlace = random.nextInt(places.count())
-                currentPlace = places[randomPlace]
-                place_txt.text = currentPlace.placeTitle
+                viewModel.assignCurrentPlace(places[randomPlace])
+                place_txt.text = viewModel.showCurrentPlace().placeTitle
                 placeAnimation()
             }
         }
 
         add_place_btn.setOnClickListener {
-
-            if (permissionNotGranted()) {
-                Toast.makeText(this, getString(R.string.no_permission_granted), LENGTH_SHORT).show()
-                requestPermission()
-                return@setOnClickListener
-            }
-
             val newPlaceTtl = add_place_txt.text.toString().trim()
             val newPlace = Place(Random().nextLong(), newPlaceTtl, latitude, longitude)
             var placeIsNotInList = true
@@ -109,7 +103,6 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-
         place_image.setOnClickListener { _ ->
             if (!place_txt.text.isEmpty() && place_txt.text.toString() != "") {
                 gotoPlace()
@@ -121,26 +114,11 @@ class MainActivity : AppCompatActivity() {
 
         place_image.setOnLongClickListener { _ ->
             if (!place_txt.text.isEmpty() && place_txt.text.toString() != "") {
-                val alert = AlertDialog.Builder(
-                        this)
-                alert.setTitle(getString(R.string.delete_dialog_title))
-                alert.setIcon(android.R.drawable.ic_delete)
-                alert.setMessage(getString(R.string.delete_dialog_text) + currentPlace.placeTitle)
-                alert.setPositiveButton(getString(R.string.possitive), { _, _ ->
-                    var idx = places.indexOf(currentPlace)
-                    places.removeAt(idx)
-                    viewModel.deletePlace(currentPlace)
-                    Toast.makeText(this, getString(R.string.delete_dialog_success), LENGTH_SHORT).show()
-                    place_txt.text = ""
-                })
-                alert.setNegativeButton(getString(R.string.negative), { dialog, _ ->
-                    dialog.dismiss()
-                })
-                var alertDialog = alert.create()
-
-                alertDialog.show()
-
-                keepDialogUp(alertDialog)
+                val bundle = Bundle()
+                bundle.putCharSequence("place", viewModel.showCurrentPlace().placeTitle)
+                val dialog = DeleteDialogFragment()
+                dialog.arguments = bundle
+                dialog.show(supportFragmentManager, "delete")
                 true
             } else {
                 Toast.makeText(this, getString(R.string.delete_dialog_empty_place), LENGTH_SHORT).show()
@@ -158,53 +136,39 @@ class MainActivity : AppCompatActivity() {
      */
     @SuppressLint("MissingPermission")
     private fun setUpLocationManager() {
-
-        if (permissionNotGranted()) return
-
         var locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
 
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Toast.makeText(this, getString(R.string.error_loc_unavailable), LENGTH_LONG).show()
         } else {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission
-                    (this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION)
-            } else {
-                val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                if (location != null) {
-                    val lati = location.latitude
-                    val longi = location.longitude
-                    latitude = lati.toString()
-                    longitude = longi.toString()
-                }
+            val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (location != null) {
+                val lati = location.latitude
+                val longi = location.longitude
+                latitude = lati.toString()
+                longitude = longi.toString()
             }
         }
-
-    }
-
-    /*
-     * Check if the user has granted a permission
-     * for location
-     */
-    private fun permissionNotGranted(): Boolean {
-        val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, getString(R.string.permission_denial), LENGTH_LONG).show()
-            requestPermission()
-            return true
-        }
-        return false
     }
 
     /*
      * Pop up a request permission window
+     * Check if the user has granted a permission
+     * for location
      */
-    private fun requestPermission(){
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION)
+    private fun requestPermission() {
+        val rxPermissions = RxPermissions(this)
+        rxPermissions
+                .request(Manifest.permission.ACCESS_FINE_LOCATION)
+                .subscribe { granted ->
+                    if (granted) {
+                        setUpLocationManager()
+                    } else {
+                        Toast.makeText(this, getString(R.string.permission_denial), LENGTH_LONG).show()
+                        finish()
+                    }
+                }
     }
 
     /*
@@ -212,7 +176,7 @@ class MainActivity : AppCompatActivity() {
      * and opens google map with the place location
      */
     private fun gotoPlace() {
-        var intent = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${currentPlace.latitude},${currentPlace.longitude}"))
+        var intent = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${viewModel.showCurrentPlace().latitude},${viewModel.showCurrentPlace().longitude}"))
         startActivity(intent)
     }
 
@@ -248,6 +212,7 @@ class MainActivity : AppCompatActivity() {
                 .repeat(2)
                 .playOn(target)
     }
+
     private fun placeAnimation() {
         YoYo.with(Techniques.DropOut)
                 .duration(500)
@@ -261,12 +226,17 @@ class MainActivity : AppCompatActivity() {
      * Keeps the delete dialog up if
      * screen rotation occurs
      */
-    private fun keepDialogUp(dialog: AlertDialog){
-        var layoutParams = WindowManager.LayoutParams()
-        layoutParams.copyFrom(dialog.window.attributes)
-        layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
-        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
-        dialog.window.attributes = layoutParams
+
+    /*
+     * Implemented method from dialog interface
+     * to delete the place
+     */
+    override fun onPositive() {
+        var idx = places.indexOf(viewModel.showCurrentPlace())
+        places.removeAt(idx)
+        viewModel.deletePlace(viewModel.showCurrentPlace())
+        Toast.makeText(this, getString(R.string.delete_dialog_success), Toast.LENGTH_SHORT).show()
+        place_txt.text = ""
     }
 
 }
