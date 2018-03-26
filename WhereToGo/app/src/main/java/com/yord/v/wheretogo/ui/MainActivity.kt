@@ -59,26 +59,14 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
         setContentView(R.layout.activity_main)
         textInputLayout.setTypeface(Typeface.createFromAsset(assets, getString(R.string.path_fonts)))
         place_txt.text = savedInstanceState?.getCharSequence("place")
-        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111")
-        mAdView = findViewById(R.id.adView)
-        val adRequest = AdRequest.Builder().build()
-        mAdView.loadAd(adRequest)
+        loadAd()
 
         requestPermission()
 
         factory = Injection.provideViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, factory).get(PlaceViewModel::class.java)
 
-        disposable.add(viewModel.loadPlaces()
-        !!.subscribe({
-            places = it
-            buttonVisibility = places.count() <= 0
-            mVisibilityObservable.onNext(buttonVisibility)
-        }))
-        mVisibilityObservable.observeOn(AndroidSchedulers.mainThread()).subscribe({ t ->
-            if (t) btn_tutorial.visibility = View.VISIBLE
-            else btn_tutorial.visibility = View.GONE
-        })
+        syncUI()
 
         where_btn.setOnClickListener {
             val random = Random()
@@ -149,6 +137,35 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
 
         btn_tutorial.setOnClickListener { showTutorial() }
 
+    }
+
+    /*
+     * Loads the simple google's Ad
+     * Testing...
+     */
+    private fun loadAd(){
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111")
+        mAdView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+    }
+
+    /*
+     * Loads the places from the ViewModel
+     * And sets the visibility of the Tutorial
+     * Button
+     */
+    private fun syncUI(){
+        disposable.add(viewModel.loadPlaces()
+        !!.subscribe({
+            places = it
+            buttonVisibility = places.count() <= 0
+            mVisibilityObservable.onNext(buttonVisibility)
+        }))
+        mVisibilityObservable.observeOn(AndroidSchedulers.mainThread()).subscribe({ t ->
+            if (t) btn_tutorial.visibility = View.VISIBLE
+            else btn_tutorial.visibility = View.GONE
+        })
     }
 
     /*
