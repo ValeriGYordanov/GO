@@ -18,6 +18,10 @@ import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.yord.v.wheretogo.R
 import com.yord.v.wheretogo.injection.Injection
@@ -39,6 +43,7 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
 
     private lateinit var factory: ViewModelFactory
     private lateinit var viewModel: PlaceViewModel
+    lateinit var mAdView : AdView
 
     private lateinit var places: MutableList<Place>
     private val disposable = CompositeDisposable()
@@ -54,6 +59,10 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
         setContentView(R.layout.activity_main)
         textInputLayout.setTypeface(Typeface.createFromAsset(assets, getString(R.string.path_fonts)))
         place_txt.text = savedInstanceState?.getCharSequence("place")
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111")
+        mAdView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
 
         requestPermission()
 
