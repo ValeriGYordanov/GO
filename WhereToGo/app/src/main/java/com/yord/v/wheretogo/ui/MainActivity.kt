@@ -24,7 +24,11 @@ import com.yord.v.wheretogo.injection.Injection
 import com.yord.v.wheretogo.model.Place
 import com.yord.v.wheretogo.viewmodel.PlaceViewModel
 import com.yord.v.wheretogo.viewmodel.ViewModelFactory
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.Consumer
+import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_main.*
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
@@ -38,9 +42,12 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
 
     private lateinit var places: MutableList<Place>
     private val disposable = CompositeDisposable()
+    private var buttonVisibility = true
 
     private var latitude = ""
     private var longitude = ""
+
+    private val mVisibilityObservable = PublishSubject.create<Boolean>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,11 +63,13 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
         disposable.add(viewModel.loadPlaces()
         !!.subscribe({
             places = it
-            if (places.count() > 0){
-                btn_tutorial.visibility = View.GONE
-            }
+            buttonVisibility = places.count() <= 0
+            mVisibilityObservable.onNext(buttonVisibility)
         }))
-
+        mVisibilityObservable.observeOn(AndroidSchedulers.mainThread()).subscribe({ t ->
+            if (t) btn_tutorial.visibility = View.VISIBLE
+            else btn_tutorial.visibility = View.GONE
+        })
 
         where_btn.setOnClickListener {
             val random = Random()

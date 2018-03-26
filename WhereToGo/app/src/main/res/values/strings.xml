@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WhereToGO</string>
+    <string name="app_name" translatable="false">WhereToGO</string>
     <string name="delete_dialog_title">Delete Place???</string>
     <string name="delete_dialog_text">Are you sure you want to delete : </string>
     <string name="possitive">Yes</string>
@@ -11,7 +11,7 @@
     <string name="place_successfuly_added">, added!</string>
     <string name="no_permission_granted">No permission granted</string>
     <string name="empty_field">You haven\'t inserted anything yet!</string>
-    <string name="path_fonts">fonts/Aclonica.ttf</string>
+    <string name="path_fonts" translatable="false">fonts/Aclonica.ttf</string>
     <string name="permission_denial">Permission to location denied, please try again!</string>
     <string name="error_loc_unavailable">NO LOCATION AVAILABLE</string>
     <string name="Tutorial_Btn">Tutorial</string>
