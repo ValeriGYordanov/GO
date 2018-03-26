@@ -1,13 +1,12 @@
-package com.yord.v.wheretogo
+package com.yord.v.wheretogo.ui
 
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
-/**
- * Created by Valery on 3/23/2018.
- */
+import com.yord.v.wheretogo.R
+
 open class DeleteDialogFragment: DialogFragment() {
 
     interface OptionDialogListener {

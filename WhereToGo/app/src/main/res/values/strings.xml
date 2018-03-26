@@ -14,4 +14,8 @@
     <string name="path_fonts">fonts/Aclonica.ttf</string>
     <string name="permission_denial">Permission to location denied, please try again!</string>
     <string name="error_loc_unavailable">NO LOCATION AVAILABLE</string>
+    <string name="Tutorial_Btn">Tutorial</string>
+    <string name="Where_Btn">Where?!</string>
+    <string name="add_place_edt">Add Place</string>
+    <string name="Add_place_btn">Add</string>
 </resources>

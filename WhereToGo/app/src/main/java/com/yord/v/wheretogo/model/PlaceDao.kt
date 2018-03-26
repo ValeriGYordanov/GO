@@ -6,9 +6,6 @@ import android.arch.persistence.room.Insert
 import android.arch.persistence.room.Query
 import io.reactivex.Flowable
 
-/**
- * Created by Valery on 3/15/2018.
- */
 @Dao
 interface PlaceDao{
 

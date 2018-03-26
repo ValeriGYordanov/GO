@@ -1,11 +1,10 @@
-package com.yord.v.wheretogo
+package com.yord.v.wheretogo.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.location.Location
 import android.location.LocationListener
@@ -13,26 +12,23 @@ import android.location.LocationManager
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
-import android.util.Log
 import android.view.View
-import android.view.WindowManager
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import com.tbruyelle.rxpermissions2.RxPermissions
+import com.yord.v.wheretogo.R
 import com.yord.v.wheretogo.injection.Injection
 import com.yord.v.wheretogo.model.Place
 import com.yord.v.wheretogo.viewmodel.PlaceViewModel
 import com.yord.v.wheretogo.viewmodel.ViewModelFactory
-import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
-import org.reactivestreams.Subscription
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
+import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
 import java.util.*
 
 class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListener {
@@ -58,7 +54,13 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
         viewModel = ViewModelProviders.of(this, factory).get(PlaceViewModel::class.java)
 
         disposable.add(viewModel.loadPlaces()
-        !!.subscribe({ places = it }))
+        !!.subscribe({
+            places = it
+            if (places.count() > 0){
+                btn_tutorial.visibility = View.GONE
+            }
+        }))
+
 
         where_btn.setOnClickListener {
             val random = Random()
@@ -127,6 +129,8 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
             }
         }
 
+        btn_tutorial.setOnClickListener { showTutorial() }
+
     }
 
     /*
@@ -136,7 +140,7 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
      */
     @SuppressLint("MissingPermission")
     private fun setUpLocationManager() {
-        var locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
 
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -176,7 +180,7 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
      * and opens google map with the place location
      */
     private fun gotoPlace() {
-        var intent = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${viewModel.showCurrentPlace().latitude},${viewModel.showCurrentPlace().longitude}"))
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${viewModel.showCurrentPlace().latitude},${viewModel.showCurrentPlace().longitude}"))
         startActivity(intent)
     }
 
@@ -232,11 +236,47 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
      * to delete the place
      */
     override fun onPositive() {
-        var idx = places.indexOf(viewModel.showCurrentPlace())
+        val idx = places.indexOf(viewModel.showCurrentPlace())
         places.removeAt(idx)
         viewModel.deletePlace(viewModel.showCurrentPlace())
         Toast.makeText(this, getString(R.string.delete_dialog_success), Toast.LENGTH_SHORT).show()
         place_txt.text = ""
     }
 
+    private fun showTutorial(){
+        val sequence = MaterialShowcaseSequence(this)
+        val config = ShowcaseConfig()
+
+        config.delay = 200
+        config.shapePadding = 96
+        config.renderOverNavigationBar = true
+
+        sequence.setConfig(config)
+        sequence.addSequenceItem(tutorialItem(textInputLayout, "Type your place title here!\n#Remember to add places when you are currently visiting it.", "OK", "rectangle"))
+                .addSequenceItem(tutorialItem(add_place_btn, "Press to add your place in the database", "OK", "rectangle"))
+                .addSequenceItem(tutorialItem(place_image, "Just press to start a navigation to this place!", "Sweeeet...", "circle"))
+                .addSequenceItem(tutorialItem(place_image, "Long Press to delete the current place", "Ahm, Fine?", "circle"))
+                .addSequenceItem(tutorialItem(where_btn, "Press when you have no idea for place", "Aha...", "rectangle"))
+                .addSequenceItem(tutorialItem(place_txt, "And finally your proposal - WhereToGO", "Yay!!!", "circle"))
+        sequence.start()
+    }
+
+    private fun tutorialItem(target: View, text: String, dismiss: String, shape: String): MaterialShowcaseView? {
+        val materialShowCase = MaterialShowcaseView.Builder(this)
+        return if (shape == "rectangle") {
+            materialShowCase.setTarget(target)
+                    .setDismissText(dismiss)
+                    .setContentText(text)
+                    .setDismissOnTouch(true)
+                    .withRectangleShape(true)
+                    .build()
+        } else{
+            materialShowCase.setTarget(target)
+                    .setDismissText(dismiss)
+                    .setContentText(text)
+                    .setDismissOnTouch(true)
+                    .build()
+        }
+
+    }
 }

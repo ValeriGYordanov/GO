@@ -5,7 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorAccentLight"
-    tools:context="com.yord.v.wheretogo.MainActivity">
+    tools:context="com.yord.v.wheretogo.ui.MainActivity">
+
+    <Button
+        android:id="@+id/btn_tutorial"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/Tutorial_Btn"
+        android:textAllCaps="false"
+        android:textSize="12sp"
+        android:background="@android:color/transparent"
+        android:fontFamily="@font/aclonica"
+        />
 
     <TextView
         android:id="@+id/place_txt"
@@ -13,7 +24,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:fontFamily="@font/aclonica"
-        android:text="Place"
         android:textAllCaps="false"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -33,7 +43,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.1"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
 
     <Button
         android:id="@+id/where_btn"
@@ -42,7 +53,7 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:fontFamily="@font/aclonica"
-        android:text="Where?!"
+        android:text="@string/Where_Btn"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         android:textSize="24sp"
@@ -71,7 +82,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/aclonica"
-            android:hint="Add Place"
+            android:hint="@string/add_place_edt"
             android:maxLines="1"
             android:singleLine="true"
             android:textAlignment="center"
@@ -88,7 +99,7 @@
         android:layout_marginStart="8dp"
         android:background="@color/colorAccent"
         android:fontFamily="@font/aclonica"
-        android:text="Add"
+        android:text="@string/Add_place_btn"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/where_btn"
         app:layout_constraintEnd_toEndOf="parent"

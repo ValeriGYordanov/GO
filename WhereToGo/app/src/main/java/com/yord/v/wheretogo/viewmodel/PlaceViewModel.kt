@@ -1,15 +1,10 @@
 package com.yord.v.wheretogo.viewmodel
 
 import android.arch.lifecycle.ViewModel
-import android.support.v4.app.ActivityCompat
-import com.yord.v.wheretogo.MainActivity
 import com.yord.v.wheretogo.model.Place
 import com.yord.v.wheretogo.model.PlaceDao
 import io.reactivex.Flowable
 
-/**
- * Created by Valery on 3/15/2018.
- */
 class PlaceViewModel(private val data: PlaceDao) : ViewModel(){
 
     private var livePlaces: Flowable<MutableList<Place>>? = null
