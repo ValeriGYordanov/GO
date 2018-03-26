@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
 
     private lateinit var factory: ViewModelFactory
     private lateinit var viewModel: PlaceViewModel
-    lateinit var mAdView : AdView
+    private lateinit var mAdView : AdView
 
     private lateinit var places: MutableList<Place>
     private val disposable = CompositeDisposable()
