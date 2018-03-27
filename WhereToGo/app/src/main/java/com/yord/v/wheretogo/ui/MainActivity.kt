@@ -19,19 +19,18 @@ import android.widget.Toast.LENGTH_SHORT
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.yord.v.wheretogo.R
 import com.yord.v.wheretogo.injection.Injection
 import com.yord.v.wheretogo.model.Place
+import com.yord.v.wheretogo.ui.DeleteDialogFragment.OptionDialogListener
+import com.yord.v.wheretogo.ui.PlaceListFragment.SelectedPlaceListener
 import com.yord.v.wheretogo.viewmodel.PlaceViewModel
 import com.yord.v.wheretogo.viewmodel.ViewModelFactory
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.functions.Consumer
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_main.*
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
@@ -39,7 +38,7 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
 import java.util.*
 
-class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListener {
+class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceListener {
 
     private lateinit var factory: ViewModelFactory
     private lateinit var viewModel: PlaceViewModel
@@ -137,6 +136,18 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
 
         btn_tutorial.setOnClickListener { showTutorial() }
 
+        fab_menu.setOnClickListener { view ->
+            val allPlacesFragment = PlaceListFragment()
+            val bundle = Bundle()
+            val stringsOrNulls = arrayOfNulls<String>(places.size)
+            for (i in places.indices){
+                stringsOrNulls[i] = places[i].placeTitle
+            }
+            bundle.putStringArray("allPlaces", stringsOrNulls)
+            allPlacesFragment.arguments = bundle
+            allPlacesFragment.show(fragmentManager, "placess")
+        }
+
     }
 
     /*
@@ -144,7 +155,10 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
      * Testing...
      */
     private fun loadAd(){
-        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111")
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111")//Google testID
+//        MobileAds.initialize(this, "ca-app-pub-1421901645146201~6738697501")//App-AdID
+//        ads:adUnitId="ca-app-pub-1421901645146201/3627187116" // App adUnitID - replace in XML
+
         mAdView = findViewById(R.id.adView)
         val adRequest = AdRequest.Builder().build()
         mAdView.loadAd(adRequest)
@@ -163,8 +177,13 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
             mVisibilityObservable.onNext(buttonVisibility)
         }))
         mVisibilityObservable.observeOn(AndroidSchedulers.mainThread()).subscribe({ t ->
-            if (t) btn_tutorial.visibility = View.VISIBLE
-            else btn_tutorial.visibility = View.GONE
+            if (t) {
+                btn_tutorial.visibility = View.VISIBLE
+                fab_menu.visibility = View.GONE
+            } else {
+                btn_tutorial.visibility = View.GONE
+                fab_menu.visibility = View.VISIBLE
+            }
         })
     }
 
@@ -314,4 +333,10 @@ class MainActivity : AppCompatActivity(), DeleteDialogFragment.OptionDialogListe
         }
 
     }
+
+    override fun onPlaceSelected(placeTitle: String) {
+        place_txt.text = placeTitle
+        places.forEach { place: Place -> if (place.placeTitle.equals(placeTitle, true)) viewModel.assignCurrentPlace(place) }
+    }
+
 }

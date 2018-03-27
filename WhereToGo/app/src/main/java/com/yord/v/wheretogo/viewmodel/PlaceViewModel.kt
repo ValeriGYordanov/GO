@@ -9,11 +9,15 @@ class PlaceViewModel(private val data: PlaceDao) : ViewModel(){
 
     private var livePlaces: Flowable<MutableList<Place>>? = null
     private lateinit var currentPlace: Place
+    private lateinit var allPlaces : List<Place>
 
     fun loadPlaces(): Flowable<MutableList<Place>>?{
         if (livePlaces == null) {
             livePlaces = data.getAllPlaces()
         }
+        livePlaces!!.concatMap { results -> Flowable
+                .fromIterable(results)
+                .map { allPlaces = results.toList()}}
         return livePlaces
     }
 
@@ -35,6 +39,9 @@ class PlaceViewModel(private val data: PlaceDao) : ViewModel(){
         this.currentPlace = currentPlace
     }
 
+    fun getLoadedPlaces(): List<Place> {
+        return allPlaces
+    }
 
 }
 
