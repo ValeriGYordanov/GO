@@ -137,6 +137,10 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
         btn_tutorial.setOnClickListener { showTutorial() }
 
         fab_menu.setOnClickListener { view ->
+            if (places.count() < 1){
+                Toast.makeText(this, "You haven't inserted anythign, yet!", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             val allPlacesFragment = PlaceListFragment()
             val bundle = Bundle()
             val stringsOrNulls = arrayOfNulls<String>(places.size)
@@ -177,13 +181,8 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
             mVisibilityObservable.onNext(buttonVisibility)
         }))
         mVisibilityObservable.observeOn(AndroidSchedulers.mainThread()).subscribe({ t ->
-            if (t) {
-                btn_tutorial.visibility = View.VISIBLE
-                fab_menu.visibility = View.GONE
-            } else {
-                btn_tutorial.visibility = View.GONE
-                fab_menu.visibility = View.VISIBLE
-            }
+            if (t) btn_tutorial.visibility = View.VISIBLE
+            else btn_tutorial.visibility = View.GONE
         })
     }
 
@@ -297,6 +296,10 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
         place_txt.text = ""
     }
 
+    /*
+     * Begin the tutorial session
+     * explaining the buttons
+     */
     private fun showTutorial(){
         val sequence = MaterialShowcaseSequence(this)
         val config = ShowcaseConfig()
@@ -310,6 +313,7 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
                 .addSequenceItem(tutorialItem(add_place_btn, "Press to add your place in the database", "OK", "rectangle"))
                 .addSequenceItem(tutorialItem(place_image, "Just press to start a navigation to this place!", "Sweeeet...", "circle"))
                 .addSequenceItem(tutorialItem(place_image, "Long Press to delete the current place", "Ahm, Fine?", "circle"))
+                .addSequenceItem(tutorialItem(fab_menu, "See All your places here", "Nice...", "circle"))
                 .addSequenceItem(tutorialItem(where_btn, "Press when you have no idea for place", "Aha...", "rectangle"))
                 .addSequenceItem(tutorialItem(place_txt, "And finally your proposal - WhereToGO", "Yay!!!", "circle"))
         sequence.start()

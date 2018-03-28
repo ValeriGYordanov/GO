@@ -14,4 +14,7 @@
         <item name="android:fontFamily">@font/aclonica</item>
     </style>
 
+    <style name="NoBackgroundThemeDialog" parent="Base.Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 </resources>

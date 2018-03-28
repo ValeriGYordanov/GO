@@ -21,6 +21,11 @@ class PlaceListFragment: DialogFragment() {
 
     var placeTitles: Array<String>? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.NoBackgroundThemeDialog)
+    }
+
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView = inflater?.inflate(R.layout.all_places_fragment, container, false)
         val act = activity as SelectedPlaceListener
@@ -31,8 +36,6 @@ class PlaceListFragment: DialogFragment() {
 
         val adapter = PlaceAdapter(this, placeTitles, act)
         recView.adapter = adapter
-
-        this.dialog.setTitle("Places")
 
         return rootView!!
     }
