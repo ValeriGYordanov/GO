@@ -7,14 +7,14 @@ import android.arch.persistence.room.Query
 import io.reactivex.Flowable
 
 @Dao
-interface PlaceDao{
+interface SpotDao{
 
-    @Query("SELECT * FROM place")
-    fun getAllPlaces(): Flowable<MutableList<Place>>
+    @Query("SELECT * FROM spot")
+    fun getAllSpots(): Flowable<MutableList<Spot>>
 
     @Insert
-    fun insertNewPlace(place: Place)
+    fun insertNewSpot(spot: Spot)
 
     @Delete
-    fun deletePlace(place: Place)
+    fun deleteSpot(spot: Spot)
 }

@@ -26,7 +26,7 @@ open class DeleteDialogFragment: DialogFragment() {
                 activity)
                 .setTitle(getString(R.string.delete_dialog_title))
                 .setIcon(android.R.drawable.ic_delete)
-                .setMessage(getString(R.string.delete_dialog_text) + arguments.get("place"))
+                .setMessage(getString(R.string.delete_dialog_text) + arguments.get("spot"))
                 .setPositiveButton(getString(R.string.possitive), { _, _ ->
                     act.onPositive()
                 })
