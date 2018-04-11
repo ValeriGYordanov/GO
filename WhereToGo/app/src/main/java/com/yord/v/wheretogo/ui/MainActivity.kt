@@ -22,7 +22,6 @@ import com.daimajia.androidanimations.library.YoYo
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
-import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.yord.v.wheretogo.R
@@ -146,7 +145,7 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedSpotList
 
         btn_tutorial.setOnClickListener { showTutorial() }
 
-        fab_menu.setOnClickListener { view ->
+        fab_menu.setOnClickListener { _ ->
             if (spots.count() < 1){
                 Toast.makeText(this, "You haven't inserted anything, yet!", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
@@ -320,6 +319,7 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedSpotList
 
         sequence.setConfig(config)
         sequence.addSequenceItem(tutorialItem(textInputLayout, "Type your place title here!\n#Remember to add spots when you are currently visiting it.", "OK", "rectangle"))
+                .addSequenceItem(tutorialItem(current_location_box, "Check the box, if you want to use your current location for late navigation route, or leave unchecked and choose the location yourself", "Mhm", "circle"))
                 .addSequenceItem(tutorialItem(add_spot_btn, "Press to add your place in the database", "OK", "rectangle"))
                 .addSequenceItem(tutorialItem(spot_image, "Just press to start a navigation to this place!", "Sweeeet...", "circle"))
                 .addSequenceItem(tutorialItem(spot_image, "Long Press to delete the current place", "Ahm, Fine?", "circle"))
@@ -359,8 +359,6 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedSpotList
                 val place = PlacePicker.getPlace(this, data)
                 latitude = place.latLng.latitude.toString()
                 longitude = place.latLng.longitude.toString()
-
-
                 val newSpot = Spot(Random().nextLong(), newSpotTtl, latitude, longitude)
                 viewModel.addNewSpot(newSpot)
                 spots.plus(newSpot)
