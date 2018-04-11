@@ -15,7 +15,7 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/all_places_txt"
+            android:id="@+id/all_spots_txt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="24sp"
@@ -28,7 +28,7 @@
         <ImageView
             android:layout_width="50dp"
             android:layout_height="45dp"
-            android:src="@drawable/icon_place"
+            android:src="@drawable/icon_spot"
             android:layout_marginStart="10dp"
             />
 

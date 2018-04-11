@@ -8,18 +8,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.yord.v.wheretogo.R
-import com.yord.v.wheretogo.ui.recycler.PlaceAdapter
+import com.yord.v.wheretogo.ui.recycler.SpotAdapter
 
 /**
  * Created by Valery on 3/27/2018.
  */
-class PlaceListFragment: DialogFragment() {
+class SpotListFragment: DialogFragment() {
 
-    interface SelectedPlaceListener {
-        fun onPlaceSelected(placeTitle: String)
+    interface SelectedSpotListener {
+        fun onSpotSelected(spotTitle: String)
     }
 
-    var placeTitles: Array<String>? = null
+    var spotTitles: Array<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,14 +27,14 @@ class PlaceListFragment: DialogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val rootView = inflater?.inflate(R.layout.all_places_fragment, container, false)
-        val act = activity as SelectedPlaceListener
-        val recView = rootView?.findViewById(R.id.recycler_places) as RecyclerView
+        val rootView = inflater?.inflate(R.layout.all_spots_fragment, container, false)
+        val act = activity as SelectedSpotListener
+        val recView = rootView?.findViewById(R.id.recycler_spots) as RecyclerView
         recView.layoutManager = LinearLayoutManager(activity)
 
-        placeTitles = arguments["allPlaces"] as Array<String>?
+        spotTitles = arguments["allSpots"] as Array<String>?
 
-        val adapter = PlaceAdapter(this, placeTitles, act)
+        val adapter = SpotAdapter(this, spotTitles, act)
         recView.adapter = adapter
 
         return rootView!!

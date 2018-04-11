@@ -2,6 +2,7 @@ package com.yord.v.wheretogo.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
@@ -21,13 +22,14 @@ import com.daimajia.androidanimations.library.YoYo
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.location.places.ui.PlacePicker
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.yord.v.wheretogo.R
 import com.yord.v.wheretogo.injection.Injection
-import com.yord.v.wheretogo.model.Place
+import com.yord.v.wheretogo.model.Spot
 import com.yord.v.wheretogo.ui.DeleteDialogFragment.OptionDialogListener
-import com.yord.v.wheretogo.ui.PlaceListFragment.SelectedPlaceListener
-import com.yord.v.wheretogo.viewmodel.PlaceViewModel
+import com.yord.v.wheretogo.ui.SpotListFragment.SelectedSpotListener
+import com.yord.v.wheretogo.viewmodel.SpotViewModel
 import com.yord.v.wheretogo.viewmodel.ViewModelFactory
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -38,18 +40,20 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
 import java.util.*
 
-class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceListener {
+class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedSpotListener {
 
     private lateinit var factory: ViewModelFactory
-    private lateinit var viewModel: PlaceViewModel
+    private lateinit var viewModel: SpotViewModel
     private lateinit var mAdView : AdView
 
-    private lateinit var places: MutableList<Place>
+    private lateinit var spots: MutableList<Spot>
     private val disposable = CompositeDisposable()
     private var buttonVisibility = true
 
     private var latitude = ""
     private var longitude = ""
+    private var PLACE_PICKER_INTENT = 1
+    private var newSpotTtl = ""
 
     private val mVisibilityObservable = PublishSubject.create<Boolean>()
 
@@ -57,99 +61,104 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         textInputLayout.setTypeface(Typeface.createFromAsset(assets, getString(R.string.path_fonts)))
-        place_txt.text = savedInstanceState?.getCharSequence("place")
+        spot_txt.text = savedInstanceState?.getCharSequence("spot")
         loadAd()
 
         requestPermission()
 
         factory = Injection.provideViewModelFactory(this)
-        viewModel = ViewModelProviders.of(this, factory).get(PlaceViewModel::class.java)
+        viewModel = ViewModelProviders.of(this, factory).get(SpotViewModel::class.java)
 
         syncUI()
 
         where_btn.setOnClickListener {
             val random = Random()
-            if (places.count() == 0) {
+            if (spots.count() == 0) {
                 Toast.makeText(this, getString(R.string.empty_field), LENGTH_SHORT).show()
                 errorEmptyOutputAnimation(textInputLayout)
 
             } else {
-                val randomPlace = random.nextInt(places.count())
-                viewModel.assignCurrentPlace(places[randomPlace])
-                place_txt.text = viewModel.showCurrentPlace().placeTitle
-                placeAnimation()
+                val randomSpot = random.nextInt(spots.count())
+                viewModel.assignCurrentSpot(spots[randomSpot])
+                spot_txt.text = viewModel.showCurrentSpot().spotTitle
+                spotAnimation()
             }
         }
 
-        add_place_btn.setOnClickListener {
-            val newPlaceTtl = add_place_txt.text.toString().trim()
-            val newPlace = Place(Random().nextLong(), newPlaceTtl, latitude, longitude)
-            var placeIsNotInList = true
+        add_spot_btn.setOnClickListener {
+            newSpotTtl = add_spot_txt.text.toString().trim()
+            val newSpot = Spot(Random().nextLong(), newSpotTtl, latitude, longitude)
+            var spotIsNotInList = true
 
-            if (!newPlaceTtl.isEmpty()) {
-                places.forEach { place: Place ->
+            if (!newSpotTtl.isEmpty()) {
+                spots.forEach { spot: Spot ->
                     run {
-                        if (place.placeTitle.equals(newPlaceTtl, true)) {
-                            placeIsNotInList = false
+                        if (spot.spotTitle.equals(newSpotTtl, true)) {
+                            spotIsNotInList = false
                         }
                     }
                 }
-                if (placeIsNotInList) {
-                    viewModel.addNewPlace(newPlace)
-                    places.plus(newPlace)
-                    Toast.makeText(this, newPlace.placeTitle + getString(R.string.place_successfuly_added), LENGTH_SHORT).show()
+                if (spotIsNotInList) {
+                    if (current_location_box.isChecked) {
+                        viewModel.addNewSpot(newSpot)
+                        spots.plus(newSpot)
+                        Toast.makeText(this, newSpot.spotTitle + getString(R.string.spot_successfuly_added), LENGTH_SHORT).show()
+                    }else{
+                        val builder = PlacePicker.IntentBuilder()
+                        startActivityForResult(builder.build(this), PLACE_PICKER_INTENT)
+                    }
                 } else {
-                    Toast.makeText(this, newPlace.placeTitle + getString(R.string.place_already_in_list), LENGTH_LONG).show()
+                    Toast.makeText(this, newSpot.spotTitle + getString(R.string.spot_already_in_list), LENGTH_LONG).show()
                 }
             } else {
-                Toast.makeText(this, getString(R.string.missing_place_title), LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.missing_spot_title), LENGTH_SHORT).show()
                 errorEmptyOutputAnimation(textInputLayout)
             }
 
-            add_place_txt.text.clear()
+            add_spot_txt.text.clear()
 
         }
 
-        place_image.setOnClickListener { _ ->
-            if (!place_txt.text.isEmpty() && place_txt.text.toString() != "") {
-                gotoPlace()
+        spot_image.setOnClickListener { _ ->
+            if (!spot_txt.text.isEmpty() && spot_txt.text.toString() != "") {
+                gotoSpot()
             } else {
-                Toast.makeText(this, getString(R.string.delete_dialog_empty_place), LENGTH_SHORT).show()
-                errorEmptyOutputAnimation(place_image)
+                Toast.makeText(this, getString(R.string.delete_dialog_empty_spot), LENGTH_SHORT).show()
+                errorEmptyOutputAnimation(spot_image)
             }
         }
 
-        place_image.setOnLongClickListener { _ ->
-            if (!place_txt.text.isEmpty() && place_txt.text.toString() != "") {
+        spot_image.setOnLongClickListener { _ ->
+            if (!spot_txt.text.isEmpty() && spot_txt.text.toString() != "") {
                 val bundle = Bundle()
-                bundle.putCharSequence("place", viewModel.showCurrentPlace().placeTitle)
+                bundle.putCharSequence("spot", viewModel.showCurrentSpot().spotTitle)
                 val dialog = DeleteDialogFragment()
                 dialog.arguments = bundle
                 dialog.show(supportFragmentManager, "delete")
                 true
             } else {
-                Toast.makeText(this, getString(R.string.delete_dialog_empty_place), LENGTH_SHORT).show()
-                errorEmptyOutputAnimation(place_image)
+                Toast.makeText(this, getString(R.string.delete_dialog_empty_spot), LENGTH_SHORT).show()
+                errorEmptyOutputAnimation(spot_image)
                 true
             }
         }
 
         btn_tutorial.setOnClickListener { showTutorial() }
 
-        fab_menu.setOnClickListener { view ->
-            if (places.count() < 1){
-                Toast.makeText(this, "You haven't inserted anythign, yet!", Toast.LENGTH_LONG).show()
+        fab_menu.setOnClickListener { _ ->
+            if (spots.count() < 1){
+                Toast.makeText(this, "You haven't inserted anything, yet!", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
-            val allPlacesFragment = PlaceListFragment()
+            val allSpotssFragment = SpotListFragment()
             val bundle = Bundle()
-            val stringsOrNulls = arrayOfNulls<String>(places.size)
-            for (i in places.indices){
-                stringsOrNulls[i] = places[i].placeTitle
+            val stringsOrNulls = arrayOfNulls<String>(spots.size)
+            for (i in spots.indices){
+                stringsOrNulls[i] = spots[i].spotTitle
             }
-            bundle.putStringArray("allPlaces", stringsOrNulls)
-            allPlacesFragment.arguments = bundle
-            allPlacesFragment.show(fragmentManager, "placess")
+            bundle.putStringArray("allSpots", stringsOrNulls)
+            allSpotssFragment.arguments = bundle
+            allSpotssFragment.show(fragmentManager, "spots")
         }
 
     }
@@ -169,15 +178,15 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
     }
 
     /*
-     * Loads the places from the ViewModel
+     * Loads the spots from the ViewModel
      * And sets the visibility of the Tutorial
      * Button
      */
     private fun syncUI(){
-        disposable.add(viewModel.loadPlaces()
+        disposable.add(viewModel.loadSpots()
         !!.subscribe({
-            places = it
-            buttonVisibility = places.count() <= 0
+            spots = it
+            buttonVisibility = spots.count() <= 0
             mVisibilityObservable.onNext(buttonVisibility)
         }))
         mVisibilityObservable.observeOn(AndroidSchedulers.mainThread()).subscribe({ t ->
@@ -232,8 +241,8 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
      * Handle the image button click
      * and opens google map with the place location
      */
-    private fun gotoPlace() {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${viewModel.showCurrentPlace().latitude},${viewModel.showCurrentPlace().longitude}"))
+    private fun gotoSpot() {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${viewModel.showCurrentSpot().latitude},${viewModel.showCurrentSpot().longitude}"))
         startActivity(intent)
     }
 
@@ -242,7 +251,7 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
      */
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        outState?.putCharSequence("place", place_txt.text.toString())
+        outState?.putCharSequence("spot", spot_txt.text.toString())
     }
 
     /*
@@ -270,13 +279,13 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
                 .playOn(target)
     }
 
-    private fun placeAnimation() {
+    private fun spotAnimation() {
         YoYo.with(Techniques.DropOut)
                 .duration(500)
-                .playOn(place_txt)
+                .playOn(spot_txt)
         YoYo.with(Techniques.DropOut)
                 .duration(500)
-                .playOn(place_image)
+                .playOn(spot_image)
     }
 
     /*
@@ -289,11 +298,11 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
      * to delete the place
      */
     override fun onPositive() {
-        val idx = places.indexOf(viewModel.showCurrentPlace())
-        places.removeAt(idx)
-        viewModel.deletePlace(viewModel.showCurrentPlace())
+        val idx = spots.indexOf(viewModel.showCurrentSpot())
+        spots.removeAt(idx)
+        viewModel.deleteSpot(viewModel.showCurrentSpot())
         Toast.makeText(this, getString(R.string.delete_dialog_success), Toast.LENGTH_SHORT).show()
-        place_txt.text = ""
+        spot_txt.text = ""
     }
 
     /*
@@ -309,13 +318,14 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
         config.renderOverNavigationBar = true
 
         sequence.setConfig(config)
-        sequence.addSequenceItem(tutorialItem(textInputLayout, "Type your place title here!\n#Remember to add places when you are currently visiting it.", "OK", "rectangle"))
-                .addSequenceItem(tutorialItem(add_place_btn, "Press to add your place in the database", "OK", "rectangle"))
-                .addSequenceItem(tutorialItem(place_image, "Just press to start a navigation to this place!", "Sweeeet...", "circle"))
-                .addSequenceItem(tutorialItem(place_image, "Long Press to delete the current place", "Ahm, Fine?", "circle"))
-                .addSequenceItem(tutorialItem(fab_menu, "See All your places here", "Nice...", "circle"))
+        sequence.addSequenceItem(tutorialItem(textInputLayout, "Type your place title here!\n#Remember to add spots when you are currently visiting it.", "OK", "rectangle"))
+                .addSequenceItem(tutorialItem(current_location_box, "Check the box, if you want to use your current location for late navigation route, or leave unchecked and choose the location yourself", "Mhm", "circle"))
+                .addSequenceItem(tutorialItem(add_spot_btn, "Press to add your place in the database", "OK", "rectangle"))
+                .addSequenceItem(tutorialItem(spot_image, "Just press to start a navigation to this place!", "Sweeeet...", "circle"))
+                .addSequenceItem(tutorialItem(spot_image, "Long Press to delete the current place", "Ahm, Fine?", "circle"))
+                .addSequenceItem(tutorialItem(fab_menu, "See All your spots here", "Nice...", "circle"))
                 .addSequenceItem(tutorialItem(where_btn, "Press when you have no idea for place", "Aha...", "rectangle"))
-                .addSequenceItem(tutorialItem(place_txt, "And finally your proposal - WhereToGO", "Yay!!!", "circle"))
+                .addSequenceItem(tutorialItem(spot_txt, "And finally your proposal - WhereToGO", "Yay!!!", "circle"))
         sequence.start()
     }
 
@@ -338,9 +348,23 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedPlaceLis
 
     }
 
-    override fun onPlaceSelected(placeTitle: String) {
-        place_txt.text = placeTitle
-        places.forEach { place: Place -> if (place.placeTitle.equals(placeTitle, true)) viewModel.assignCurrentPlace(place) }
+    override fun onSpotSelected(spotTitle: String) {
+        spot_txt.text = spotTitle
+        spots.forEach { spot: Spot -> if (spot.spotTitle.equals(spotTitle, true)) viewModel.assignCurrentSpot(spot) }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == PLACE_PICKER_INTENT){
+            if (resultCode == Activity.RESULT_OK){
+                val place = PlacePicker.getPlace(this, data)
+                latitude = place.latLng.latitude.toString()
+                longitude = place.latLng.longitude.toString()
+                val newSpot = Spot(Random().nextLong(), newSpotTtl, latitude, longitude)
+                viewModel.addNewSpot(newSpot)
+                spots.plus(newSpot)
+                Toast.makeText(this, newSpot.spotTitle + getString(R.string.spot_successfuly_added), LENGTH_SHORT).show()
+            }
+        }
     }
 
 }
