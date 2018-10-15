@@ -8,19 +8,4 @@
         <item name="colorAccent">@color/colorPrimary</item>
     </style>
 
-    <style name="TextHint" parent="TextAppearance.Design.Hint">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/colorWhite</item>
-        <item name="android:fontFamily">@font/aclonica</item>
-    </style>
-
-    <style name="NoBackgroundThemeDialog" parent="Base.Theme.AppCompat.Light.Dialog">
-        <item name="android:windowBackground">@color/colorTransparent</item>
-    </style>
-
-    <style name="checkBoxStyle">
-        <item name="colorAccent">@color/colorWhite</item>
-        <item name="android:textColorSecondary">@color/colorWhite</item>
-    </style>
-
 </resources>
