@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name" translatable="false">GOPlaces</string>
+    <string name="delete_dialog_title">Delete Place???</string>
+    <string name="delete_dialog_text">Are you sure you want to delete : </string>
+    <string name="possitive">Yes</string>
+    <string name="negative">No</string>
+    <string name="delete_dialog_success">Place removed</string>
+    <string name="delete_dialog_empty_spot">No spot selected</string>
+    <string name="missing_spot_title">Type a Place title, please!</string>
+    <string name="spot_already_in_list">, is already in the list. Add new one!</string>
+    <string name="spot_successfuly_added">, added!</string>
+    <string name="no_permission_granted">No permission granted</string>
+    <string name="empty_field">You haven\'t inserted anything yet!</string>
+    <string name="path_fonts" translatable="false">fonts/Aclonica.ttf</string>
+    <string name="permission_denial">Permission to location denied, please try again!</string>
+    <string name="error_loc_unavailable">NO LOCATION AVAILABLE</string>
+    <string name="tutorial_btn">Tutorial</string>
+    <string name="Where_Btn">Where?!</string>
+    <string name="add_spot_edt">Add Place</string>
+    <string name="add_spot_btn">Add This Place</string>
+    <string name="use_current_location">Use Current Location</string>
+</resources>
