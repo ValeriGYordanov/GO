@@ -4,8 +4,8 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimaryDark">@color/colorBlackLighter</item>
+        <item name="colorAccent">@color/colorPrimary</item>
     </style>
 
     <style name="TextHint" parent="TextAppearance.Design.Hint">
@@ -15,6 +15,12 @@
     </style>
 
     <style name="NoBackgroundThemeDialog" parent="Base.Theme.AppCompat.Light.Dialog">
-        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/colorTransparent</item>
     </style>
+
+    <style name="checkBoxStyle">
+        <item name="colorAccent">@color/colorWhite</item>
+        <item name="android:textColorSecondary">@color/colorWhite</item>
+    </style>
+
 </resources>

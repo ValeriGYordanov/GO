@@ -13,8 +13,9 @@ import com.yord.v.wheretogo.ui.SpotListFragment
  */
 class SpotAdapter(val dialog: SpotListFragment, val spots: Array<String>?, val selected: SpotListFragment.SelectedSpotListener) : RecyclerView.Adapter<SpotAdapter.ViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
-        val v = LayoutInflater.from(parent?.context).inflate(R.layout.cardview_frag, parent, false)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.cardview_frag, parent, false)
         return ViewHolder(v)
     }
 
@@ -22,10 +23,10 @@ class SpotAdapter(val dialog: SpotListFragment, val spots: Array<String>?, val s
         return spots?.size!!
     }
 
-    override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val title: String? = spots?.get(position)
-        holder?.textViewSpotTitle?.text = title
-        holder?.textViewSpotTitle?.setOnClickListener { view ->
+        holder.textViewSpotTitle.text = title
+        holder.textViewSpotTitle.setOnClickListener { view ->
             dialog.dismiss()
             selected.onSpotSelected(title!!)
         }

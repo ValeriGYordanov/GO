@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">WhereToGO</string>
+    <string name="app_name" translatable="false">GOPlaces</string>
     <string name="delete_dialog_title">Delete Place???</string>
     <string name="delete_dialog_text">Are you sure you want to delete : </string>
     <string name="possitive">Yes</string>
@@ -17,6 +17,6 @@
     <string name="Tutorial_Btn">Tutorial</string>
     <string name="Where_Btn">Where?!</string>
     <string name="add_spot_edt">Add Place</string>
-    <string name="Add_spot_btn">Add</string>
+    <string name="add_spot_btn">Add This Place</string>
     <string name="use_current_location">Use Current Location</string>
 </resources>

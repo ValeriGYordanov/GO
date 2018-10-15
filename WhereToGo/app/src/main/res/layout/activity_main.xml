@@ -5,25 +5,25 @@
     xmlns:ads="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorAccentLight"
+    android:background="@drawable/app_background"
     tools:context="com.yord.v.wheretogo.ui.MainActivity">
 
     <Button
         android:id="@+id/btn_tutorial"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="12dp"
         android:background="@android:color/transparent"
         android:fontFamily="@font/aclonica"
         android:text="@string/Tutorial_Btn"
         android:textAllCaps="false"
+        android:textColor="@color/colorWhite"
         android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintVertical_bias="0.05"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/spot_txt"
@@ -32,7 +32,9 @@
         android:layout_marginTop="25dp"
         android:fontFamily="@font/aclonica"
         android:textAllCaps="false"
+        android:text="AnyPlace"
         android:textSize="30sp"
+        android:textColor="@color/colorWhite"
         android:textStyle="bold"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -40,12 +42,12 @@
 
     <ImageView
         android:id="@+id/spot_image"
-        android:layout_width="169dp"
-        android:layout_height="112dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="104dp"
-        android:src="@drawable/icon_spot"
+        android:src="@drawable/app_logo_pure"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
@@ -77,6 +79,8 @@
         android:textAlignment="center"
         android:focusableInTouchMode="true"
         app:hintTextAppearance="@style/TextHint"
+        android:textColorHint="@color/colorWhite"
+        android:textColor="@color/colorWhite"
         app:layout_constraintBottom_toTopOf="@+id/where_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -92,7 +96,7 @@
             android:singleLine="true"
             android:hint="@string/add_spot_edt"
             android:textAlignment="center"
-            android:textColor="@color/colorPrimary" />
+            android:textColor="@color/colorWhite" />
     </android.support.design.widget.TextInputLayout>
 
     <Button
@@ -103,9 +107,9 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:background="@color/colorAccent"
+        android:background="@color/colorPrimary"
         android:fontFamily="@font/aclonica"
-        android:text="@string/Add_spot_btn"
+        android:text="@string/add_spot_btn"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/where_btn"
         app:layout_constraintEnd_toEndOf="parent"
@@ -114,51 +118,48 @@
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
         app:layout_constraintVertical_bias="0.407" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+    <!--<LinearLayout-->
+        <!--android:id="@+id/linearLayout"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:layout_marginStart="8dp"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent">-->
 
-        <com.google.android.gms.ads.AdView
-            xmlns:ads="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/adView"
-            android:layout_width="322dp"
-            android:layout_height="50dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="4dp"
-            ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+        <!--<com.google.android.gms.ads.AdView-->
+            <!--xmlns:ads="http://schemas.android.com/apk/res-auto"-->
+            <!--android:id="@+id/adView"-->
+            <!--android:layout_width="322dp"-->
+            <!--android:layout_height="50dp"-->
+            <!--android:layout_marginEnd="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:layout_marginTop="4dp"-->
+            <!--ads:adSize="BANNER"-->
+            <!--ads:adUnitId="ca-app-pub-3940256099942544/6300978111"-->
+            <!--app:layout_constraintEnd_toEndOf="parent"-->
+            <!--app:layout_constraintStart_toStartOf="parent"-->
+            <!--app:layout_constraintTop_toTopOf="parent">-->
 
-        </com.google.android.gms.ads.AdView>
+        <!--</com.google.android.gms.ads.AdView>-->
 
-    </LinearLayout>
+    <!--</LinearLayout>-->
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_menu"
         android:layout_width="wrap_content"
-        android:src="@android:drawable/ic_menu_today"
-
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:src="@android:drawable/ic_menu_today"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.965"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintVertical_bias="0.05"
         app:layout_constraintStart_toEndOf="@+id/btn_tutorial"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        app:layout_constraintVertical_bias="0.026" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <CheckBox
+        style="@style/checkBoxStyle"
         android:id="@+id/current_location_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -166,6 +167,8 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:textColor="@color/colorWhite"
+        android:buttonTint="@color/colorWhite"
         android:fontFamily="@font/aclonica"
         android:text="@string/use_current_location"
         android:textSize="12sp"

@@ -99,7 +99,7 @@
         android:layout_marginStart="8dp"
         android:background="@color/colorAccent"
         android:fontFamily="@font/aclonica"
-        android:text="@string/Add_spot_btn"
+        android:text="@string/add_spot_btn"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/where_btn"
         app:layout_constraintEnd_toEndOf="parent"

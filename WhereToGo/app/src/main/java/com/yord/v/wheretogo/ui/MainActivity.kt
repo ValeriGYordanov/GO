@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedSpotList
         setContentView(R.layout.activity_main)
         textInputLayout.setTypeface(Typeface.createFromAsset(assets, getString(R.string.path_fonts)))
         spot_txt.text = savedInstanceState?.getCharSequence("spot")
-        loadAd()
+//        loadAd()
 
         requestPermission()
 
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity(), OptionDialogListener, SelectedSpotList
                 errorEmptyOutputAnimation(textInputLayout)
             }
 
-            add_spot_txt.text.clear()
+            add_spot_txt.text!!.clear()
 
         }
 
