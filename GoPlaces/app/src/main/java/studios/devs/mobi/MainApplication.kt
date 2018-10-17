@@ -1,23 +1,19 @@
 package studios.devs.mobi
 
-import android.app.Activity
 import android.app.Application
-import dagger.android.AndroidInjector
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
+import studios.devs.mobi.di.AppComponent
 import studios.devs.mobi.di.DaggerAppComponent
-import javax.inject.Inject
+import studios.devs.mobi.di.modules.AppModule
 
-class MainApplication: Application(), HasActivityInjector {
-    @Inject
-    lateinit var dispatchingActivityInjector: DispatchingAndroidInjector<Activity>
+class MainApplication: Application() {
+    companion object {
+        lateinit var appComponent: AppComponent
+    }
 
     override fun onCreate() {
         super.onCreate()
-        DaggerAppComponent.create().inject(this)
+        appComponent = DaggerAppComponent.builder().appModule(AppModule(this, this)).build()
+        appComponent.inject(this)
     }
 
-    override fun activityInjector(): AndroidInjector<Activity> {
-        return dispatchingActivityInjector;
-    }
 }

@@ -1,18 +1,33 @@
 package studios.devs.mobi.di
 
+import android.content.Context
 import dagger.Component
-import dagger.android.AndroidInjectionModule
-import dagger.android.AndroidInjector
 import studios.devs.mobi.MainApplication
+import studios.devs.mobi.ui.activities.OfflineSpotActivity
 import studios.devs.mobi.di.modules.*
 import javax.inject.Singleton
+
 
 @Singleton
 @Component(modules = [
     AppModule::class,
-    AndroidInjectionModule::class,
-    ActivityModule::class,
     ViewModelModule::class,
+    DatabaseModule::class,
+    ServiceModule::class,
     RepositoryModule::class,
     LoggerModule::class])
-interface AppComponent: AndroidInjector<MainApplication> {}
+interface AppComponent {
+    fun context(): Context
+
+    /**
+     * Inject your activities like this :
+     * fun inject(activity: AnyActivity)
+     */
+    fun inject(app: MainApplication)
+
+    //region Activities
+    fun inject(clazz: OfflineSpotActivity)
+    //endregion
+
+
+}

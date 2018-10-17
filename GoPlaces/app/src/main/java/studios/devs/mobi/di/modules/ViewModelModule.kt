@@ -5,20 +5,20 @@ import androidx.lifecycle.ViewModelProvider
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
+import studios.devs.mobi.di.ViewModelFactory
 import studios.devs.mobi.di.ViewModelKey
-import studios.devs.mobi.di.ViewModelProviderFactory
-import studios.devs.mobi.viewmodels.MainViewModel
+import studios.devs.mobi.viewmodels.OfflineSpotViewModel
 
 @Module
 abstract class ViewModelModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(MainViewModel::class)
-    internal abstract fun mainViewModel(mainViewModel: MainViewModel): ViewModel
+    @ViewModelKey(OfflineSpotViewModel::class)
+    internal abstract fun offlineSpotViewModel(offlineSpotViewModel: OfflineSpotViewModel): ViewModel
 
     @Binds
-    internal abstract fun bindViewModelFactory(factory: ViewModelProviderFactory): ViewModelProvider.Factory
+    internal abstract fun bindViewModelFactory(factory: ViewModelFactory): ViewModelProvider.Factory
 
 
 }

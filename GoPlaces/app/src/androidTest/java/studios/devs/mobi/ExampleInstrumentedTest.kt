@@ -1,4 +1,4 @@
-package studios.devs
+package studios.devs.mobi
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4

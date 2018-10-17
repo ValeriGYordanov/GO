@@ -1,4 +1,4 @@
-package studios.devs
+package studios.devs.mobi
 
 import org.junit.Test
 
