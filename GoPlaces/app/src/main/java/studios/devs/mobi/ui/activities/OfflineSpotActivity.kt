@@ -1,6 +1,7 @@
 package studios.devs.mobi.ui.activities
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
@@ -11,6 +12,7 @@ import studios.devs.mobi.databinding.ActivityOfflineSpotBinding
 import studios.devs.mobi.extension.addTo
 import studios.devs.mobi.extension.rxClick
 import studios.devs.mobi.extension.rxTextChanges
+import studios.devs.mobi.extension.toVisibility
 import studios.devs.mobi.viewmodels.OfflineSpotViewModel
 import studios.devs.mobi.viewmodels.OfflineSpotViewModelInput
 import studios.devs.mobi.viewmodels.OfflineSpotViewModelInputOutput
@@ -69,14 +71,17 @@ private fun OfflineSpotViewModelInput.bind(binding: ActivityOfflineSpotBinding):
 
 private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List<Disposable> {
     return listOf(
-
+            newSpotAddedStream.subscribe { activity.showToast(it, "Spot Added", "Not Added") }
     )
 }
 
 private fun OfflineSpotViewModelOutput.bind(binding: ActivityOfflineSpotBinding): List<Disposable> {
     return listOf(
-
+            shouldShowTutorialStream.subscribe { binding.btnTutorial.visibility = it.toVisibility() },
+            randomSpotStream.subscribe { binding.spotTxt.text = it }
     )
 }
+
+
 
 

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.disposables.CompositeDisposable
 import studios.devs.mobi.model.Screen
@@ -74,4 +75,13 @@ open class BaseActivity : AppCompatActivity() {
     fun getParameter(): Serializable {
         return intent.getSerializableExtra(PARAM_DATA)
     }
+
+    fun showToast(flag: Boolean, ifPositiveText: String, ifNegativeText: String){
+        if (flag){
+            Toast.makeText(this, ifPositiveText, Toast.LENGTH_SHORT).show()
+        }else{
+            Toast.makeText(this, ifNegativeText, Toast.LENGTH_SHORT).show()
+        }
+    }
+
 }
