@@ -4,10 +4,13 @@ import androidx.lifecycle.ViewModel
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.withLatestFrom
+import io.reactivex.rxkotlin.zipWith
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
+import studios.devs.mobi.extension.flip
 import studios.devs.mobi.model.Spot
 import studios.devs.mobi.repositories.IMainRepository
+import java.util.*
 import javax.inject.Inject
 
 
@@ -20,6 +23,7 @@ interface OfflineSpotViewModelInput {
     fun useCurrentLocationIsChecked()
     fun startNavigationToShownSpot()
     fun showRandomSpot()
+    fun locationSet(latitude: String, longitude: String)
 }
 
 interface OfflineSpotViewModelOutput {
@@ -27,6 +31,9 @@ interface OfflineSpotViewModelOutput {
     val shouldShowTutorialStream: Observable<Boolean>
     val randomSpotStream: Observable<String>
     val newSpotAddedStream: Observable<Boolean>
+    val isCurrectLocationChecked: Observable<Boolean>
+    val askForLocationStream: Observable<Unit>
+    val askForSpotNameStream: Observable<Unit>
 }
 
 interface OfflineSpotViewModelInputOutput {
@@ -52,6 +59,9 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     override val shouldShowTutorialStream: Observable<Boolean>
     override val randomSpotStream: Observable<String>
     override val newSpotAddedStream: Observable<Boolean>
+    override val isCurrectLocationChecked: Observable<Boolean>
+    override val askForLocationStream: Observable<Unit>
+    override val askForSpotNameStream: Observable<Unit>
 
     //endregion
 
@@ -60,23 +70,49 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     private val loadFromDatabase = PublishSubject.create<Unit>()
     private val randomSpotSubject = PublishSubject.create<Unit>()
     private val newSpotSubject = PublishSubject.create<Unit>()
-    private val newSpotNameSubject = PublishSubject.create<String>()
+    private val newSpotNameSubject = BehaviorSubject.create<String>()
+    private val useCurrentLocationSubject = BehaviorSubject.createDefault(false)
+    private val askForLocationSubject = PublishSubject.create<Unit>()
+    private val locationSubject = PublishSubject.create<Pair<String, String>>()
+    private val emptyNameSubject = PublishSubject.create<Unit>()
     //endregion
 
     init {
+
+        val newSpot = newSpotSubject.withLatestFrom(useCurrentLocationSubject)
+                .map {
+                    if (!it.second){
+                        askForLocationSubject.onNext(Unit)
+                    }else{
+                        locationSubject.onNext(Pair("Current", "Location"))
+                    }
+                }
+                .zipWith(locationSubject).withLatestFrom(newSpotNameSubject)
+                .filter{
+                    if (it.second.isEmpty()){
+                        emptyNameSubject.onNext(Unit)
+                    }
+                    it.second.isNotEmpty() }
+                .map {
+                    //Perform Add to Database
+                }
+
         allSpotsStream = loadFromDatabase.map {
             listOf<Spot>()
         }
 
+        isCurrectLocationChecked = useCurrentLocationSubject
+        askForLocationStream = askForLocationSubject
+        askForSpotNameStream = emptyNameSubject
+
         shouldShowTutorialStream = Observable.just(false)
 
-        randomSpotStream = randomSpotSubject
-                .map { "AnyPlace" }
+        randomSpotStream = randomSpotSubject.withLatestFrom(allSpotsStream)
+                .map { it.second[Random().nextInt(it.second.size)].spotTitle }
 
-        newSpotAddedStream = newSpotSubject.withLatestFrom(newSpotNameSubject)
-                .map {
-                    return@map !it.second.isEmpty()
-                }
+        newSpotAddedStream = newSpot.map {
+            false
+        }
 
     }
 
@@ -103,7 +139,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     }
 
     override fun useCurrentLocationIsChecked() {
-
+        useCurrentLocationSubject.flip()
     }
 
     override fun startNavigationToShownSpot() {
@@ -112,6 +148,10 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
     override fun showRandomSpot() {
         randomSpotSubject.onNext(Unit)
+    }
+
+    override fun locationSet(latitude: String, longitude: String){
+        locationSubject.onNext(Pair(latitude, longitude))
     }
 
     //endregion

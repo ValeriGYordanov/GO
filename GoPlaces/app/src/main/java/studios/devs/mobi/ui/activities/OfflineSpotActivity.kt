@@ -47,6 +47,15 @@ class OfflineSpotActivity : BaseActivity() {
         viewModel.input.loadSpotsFromDatabase()
     }
 
+    fun askForLocation(){
+        showToast(true, "AskingForLocation", "AskingForLocation")
+        //viewModel.input.locationSet("lat", "long")
+    }
+    fun askForSpotName(){
+        showToast(true, "NAME", "NAME")
+        //viewModel.input.newSpotText("NEWNAME")
+    }
+
 }
 
 private fun OfflineSpotViewModelInputOutput.bind(activity: OfflineSpotActivity): List<Disposable> {
@@ -71,14 +80,17 @@ private fun OfflineSpotViewModelInput.bind(binding: ActivityOfflineSpotBinding):
 
 private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List<Disposable> {
     return listOf(
-            newSpotAddedStream.subscribe { activity.showToast(it, "Spot Added", "Not Added") }
+            newSpotAddedStream.subscribe { activity.showToast(it, "Spot Added", "Not Added") },
+            askForLocationStream.subscribe { activity.askForLocation() },
+            askForSpotNameStream.subscribe { activity.askForSpotName() }
     )
 }
 
 private fun OfflineSpotViewModelOutput.bind(binding: ActivityOfflineSpotBinding): List<Disposable> {
     return listOf(
             shouldShowTutorialStream.subscribe { binding.btnTutorial.visibility = it.toVisibility() },
-            randomSpotStream.subscribe { binding.spotTxt.text = it }
+            randomSpotStream.subscribe { binding.spotTxt.text = it },
+            isCurrectLocationChecked.subscribe { binding.currentLocationBox.isChecked = it }
     )
 }
 
