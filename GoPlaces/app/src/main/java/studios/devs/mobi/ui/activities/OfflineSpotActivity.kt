@@ -48,6 +48,7 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         viewModel
                 .bind(this)
                 .addTo(compositeDisposable)
+        viewModel.input.loadAllSpots()
     }
 
     fun askForLocation(){
@@ -93,7 +94,7 @@ private fun OfflineSpotViewModelInputOutput.bind(activity: OfflineSpotActivity):
 private fun OfflineSpotViewModelInput.bind(binding: ActivityOfflineSpotBinding): List<Disposable> {
     return listOf(
             binding.addSpotBtn.rxClick.subscribe { addNewSpot() },
-            binding.addSpotTxt.rxTextChanges.subscribe { newSpotText(it) },
+            binding.addSpotTxt.rxTextChanges.subscribe { newSpotText(it.trim()) },
             binding.btnCollectionMenu.rxClick.subscribe { showAllSpots() },
             binding.btnTutorial.rxClick.subscribe { showTutorial() },
             binding.currentLocationBox.rxClick.subscribe { useCurrentLocationIsChecked() },
@@ -109,7 +110,7 @@ private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List
             askForLocationStream.subscribe { activity.askForLocation() },
             askForSpotNameStream.subscribe { activity.askForSpotName() },
             spotIsAlreadyIncluded.subscribe { activity.spotAlreadyIncluded() },
-            allSpotsStream.observeOn(AndroidSchedulers.mainThread())
+            showAllSpotsStream.observeOn(AndroidSchedulers.mainThread())
                     .subscribe { activity.showAllSpots(it) },
             errorStream.observeOn(AndroidSchedulers.mainThread())
                     .subscribe { activity.renderError(it.description) },

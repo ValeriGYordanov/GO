@@ -15,6 +15,7 @@ import studios.devs.mobi.model.SpotEntity
 import studios.devs.mobi.model.result.IResultError
 import studios.devs.mobi.model.result.Result
 import studios.devs.mobi.repositories.IMainRepository
+import studios.devs.mobi.ui.dialogs.AllSpotsDialog
 import studios.devs.mobi.viewmodels.base.LoadingViewModel
 import studios.devs.mobi.viewmodels.base.LoadingViewModelOutput
 import java.io.Serializable
@@ -32,6 +33,7 @@ interface OfflineSpotViewModelInput {
     fun startNavigationToShownSpot()
     fun showRandomSpot()
     fun locationSet(latitude: String, longitude: String)
+    fun loadAllSpots()
 }
 
 interface OfflineSpotViewModelOutput {
@@ -45,6 +47,7 @@ interface OfflineSpotViewModelOutput {
     val askForLocationStream: Observable<Unit>
     val askForSpotNameStream: Observable<Unit>
     val spotIsAlreadyIncluded: Observable<Unit>
+    val showAllSpotsStream: Observable<List<SpotEntity>>
 }
 
 interface OfflineSpotViewModelInputOutput {
@@ -78,6 +81,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     override val askForLocationStream: Observable<Unit>
     override val askForSpotNameStream: Observable<Unit>
     override val spotIsAlreadyIncluded: Observable<Unit>
+    override val showAllSpotsStream: Observable<List<SpotEntity>>
 
     //endregion
 
@@ -94,6 +98,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     private val emptyNameSubject = PublishSubject.create<Unit>()
     private val spotInListSubject = PublishSubject.create<Unit>()
     private val spotNotInSubject = PublishSubject.create<Unit>()
+    private val showAllSpotsSubject = PublishSubject.create<Unit>()
     //endregion
 
     init {
@@ -152,6 +157,9 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
         shouldShowTutorialStream = Observable.just(false)
 
+        showAllSpotsStream = showAllSpotsSubject.withLatestFrom(allSpotsStream)
+                .map { it.second }
+
         randomSpotStream = randomSpotSubject.withLatestFrom(allSpotsStream)
                 .map { it.second[Random().nextInt(it.second.size)].spotTitle }
 
@@ -170,6 +178,11 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
     override fun addNewSpot() {
         newSpotSubject.onNext(Unit)
+        loadFromDatabase.onNext(Unit)
+    }
+
+    override fun loadAllSpots(){
+        loadFromDatabase.onNext(Unit)
     }
 
     override fun newSpotText(text: String) {
@@ -177,7 +190,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     }
 
     override fun showAllSpots() {
-        loadFromDatabase.onNext(Unit)
+        showAllSpotsSubject.onNext(Unit)
     }
 
     override fun showTutorial() {
@@ -193,7 +206,6 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     }
 
     override fun showRandomSpot() {
-        loadFromDatabase.onNext(Unit)
         randomSpotSubject.onNext(Unit)
     }
 
