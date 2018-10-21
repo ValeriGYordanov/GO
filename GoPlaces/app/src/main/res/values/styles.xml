@@ -22,4 +22,8 @@
         <item name="android:buttonTint">@color/colorWhite</item>
         <item name="android:layout_margin">@dimen/min_view_distance</item>
     </style>
+
+    <style name="NoBackgroundThemeDialog" parent="Base.Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 </resources>

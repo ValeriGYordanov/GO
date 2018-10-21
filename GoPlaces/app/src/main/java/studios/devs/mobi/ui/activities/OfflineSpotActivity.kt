@@ -1,10 +1,11 @@
 package studios.devs.mobi.ui.activities
 
 import android.os.Bundle
-import android.widget.Toast
+import android.os.Parcelable
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import studios.devs.mobi.MainApplication
 import studios.devs.mobi.R
@@ -13,14 +14,17 @@ import studios.devs.mobi.extension.addTo
 import studios.devs.mobi.extension.rxClick
 import studios.devs.mobi.extension.rxTextChanges
 import studios.devs.mobi.extension.toVisibility
+import studios.devs.mobi.model.SpotEntity
+import studios.devs.mobi.ui.dialogs.AllSpotsDialog
+import studios.devs.mobi.ui.dialogs.SPOTS_LIST
 import studios.devs.mobi.viewmodels.OfflineSpotViewModel
 import studios.devs.mobi.viewmodels.OfflineSpotViewModelInput
 import studios.devs.mobi.viewmodels.OfflineSpotViewModelInputOutput
 import studios.devs.mobi.viewmodels.OfflineSpotViewModelOutput
+import java.util.ArrayList
 import javax.inject.Inject
 
-class OfflineSpotActivity : BaseActivity() {
-
+class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener {
 
     lateinit var binding: ActivityOfflineSpotBinding
 
@@ -44,16 +48,36 @@ class OfflineSpotActivity : BaseActivity() {
         viewModel
                 .bind(this)
                 .addTo(compositeDisposable)
-        viewModel.input.loadSpotsFromDatabase()
     }
 
     fun askForLocation(){
-        showToast(true, "AskingForLocation", "AskingForLocation")
+        showToastWithArgument(true, "AskingForLocation", "AskingForLocation")
         //viewModel.input.locationSet("lat", "long")
     }
     fun askForSpotName(){
-        showToast(true, "NAME", "NAME")
-        //viewModel.input.newSpotText("NEWNAME")
+        showToast("Title should not be null or repeated!")
+    }
+    fun spotAlreadyIncluded(){
+        showToast("Spot is already in list")
+    }
+    fun showAllSpots(allSpots: List<SpotEntity>){
+        if (allSpots.isEmpty()){
+            showToast("You haven't inserted anything, yet!")
+        }else{
+            val allSpotssFragment = AllSpotsDialog()
+            val bundle = Bundle()
+            val spotTitles = arrayListOf<String>()
+            for (i in allSpots.indices){
+                spotTitles.add(allSpots[i].spotTitle)
+            }
+            bundle.putParcelableArrayList(SPOTS_LIST, allSpots as ArrayList<out Parcelable>)
+            allSpotssFragment.arguments = bundle
+            allSpotssFragment.show(supportFragmentManager, "spots")
+        }
+    }
+
+    override fun onSpotSelected(spotTitle: String) {
+        showToast("Clicked on : $spotTitle")
     }
 
 }
@@ -80,9 +104,17 @@ private fun OfflineSpotViewModelInput.bind(binding: ActivityOfflineSpotBinding):
 
 private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List<Disposable> {
     return listOf(
-            newSpotAddedStream.subscribe { activity.showToast(it, "Spot Added", "Not Added") },
+            newSpotAddedStream.observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { activity.showToast(it.spotTitle +", added!") },
             askForLocationStream.subscribe { activity.askForLocation() },
-            askForSpotNameStream.subscribe { activity.askForSpotName() }
+            askForSpotNameStream.subscribe { activity.askForSpotName() },
+            spotIsAlreadyIncluded.subscribe { activity.spotAlreadyIncluded() },
+            allSpotsStream.observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { activity.showAllSpots(it) },
+            errorStream.observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { activity.renderError(it.description) },
+            loadingViewModelOutput.isLoading.observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { activity.renderLoading(it) }
     )
 }
 

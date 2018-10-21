@@ -8,14 +8,22 @@ import io.reactivex.rxkotlin.zipWith
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import studios.devs.mobi.extension.flip
-import studios.devs.mobi.model.Spot
+import studios.devs.mobi.extension.whenError
+import studios.devs.mobi.extension.whenLoading
+import studios.devs.mobi.extension.whenSuccess
+import studios.devs.mobi.model.SpotEntity
+import studios.devs.mobi.model.result.IResultError
+import studios.devs.mobi.model.result.Result
 import studios.devs.mobi.repositories.IMainRepository
+import studios.devs.mobi.viewmodels.base.LoadingViewModel
+import studios.devs.mobi.viewmodels.base.LoadingViewModelOutput
+import java.io.Serializable
+import java.lang.Error
 import java.util.*
 import javax.inject.Inject
 
 
 interface OfflineSpotViewModelInput {
-    fun loadSpotsFromDatabase()
     fun addNewSpot()
     fun newSpotText(text: String)
     fun showAllSpots()
@@ -27,13 +35,16 @@ interface OfflineSpotViewModelInput {
 }
 
 interface OfflineSpotViewModelOutput {
-    val allSpotsStream: Observable<List<Spot>>
+    val allSpotsStream: Observable<List<SpotEntity>>
+    val errorStream: Observable<IResultError>
+    val loadingViewModelOutput: LoadingViewModelOutput
     val shouldShowTutorialStream: Observable<Boolean>
     val randomSpotStream: Observable<String>
-    val newSpotAddedStream: Observable<Boolean>
+    val newSpotAddedStream: Observable<SpotEntity>
     val isCurrectLocationChecked: Observable<Boolean>
     val askForLocationStream: Observable<Unit>
     val askForSpotNameStream: Observable<Unit>
+    val spotIsAlreadyIncluded: Observable<Unit>
 }
 
 interface OfflineSpotViewModelInputOutput {
@@ -55,18 +66,24 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
     //region output
 
-    override val allSpotsStream: Observable<List<Spot>>
+
+    override val loadingViewModelOutput: LoadingViewModelOutput
+
+    override val allSpotsStream: Observable<List<SpotEntity>>
+    override val errorStream: Observable<IResultError>
     override val shouldShowTutorialStream: Observable<Boolean>
     override val randomSpotStream: Observable<String>
-    override val newSpotAddedStream: Observable<Boolean>
+    override val newSpotAddedStream: Observable<SpotEntity>
     override val isCurrectLocationChecked: Observable<Boolean>
     override val askForLocationStream: Observable<Unit>
     override val askForSpotNameStream: Observable<Unit>
+    override val spotIsAlreadyIncluded: Observable<Unit>
 
     //endregion
 
     //region local
     private val compositeDisposable = CompositeDisposable()
+    private val allSpotsSubject = BehaviorSubject.create<List<SpotEntity>>()
     private val loadFromDatabase = PublishSubject.create<Unit>()
     private val randomSpotSubject = PublishSubject.create<Unit>()
     private val newSpotSubject = PublishSubject.create<Unit>()
@@ -75,6 +92,8 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     private val askForLocationSubject = PublishSubject.create<Unit>()
     private val locationSubject = PublishSubject.create<Pair<String, String>>()
     private val emptyNameSubject = PublishSubject.create<Unit>()
+    private val spotInListSubject = PublishSubject.create<Unit>()
+    private val spotNotInSubject = PublishSubject.create<Unit>()
     //endregion
 
     init {
@@ -86,20 +105,46 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
                     }else{
                         locationSubject.onNext(Pair("Current", "Location"))
                     }
+                    return@map it.second
                 }
-                .zipWith(locationSubject).withLatestFrom(newSpotNameSubject)
+                .zipWith(locationSubject)
+                .withLatestFrom(newSpotNameSubject)
                 .filter{
                     if (it.second.isEmpty()){
                         emptyNameSubject.onNext(Unit)
                     }
                     it.second.isNotEmpty() }
+                .map { return@map Pair(it.first.second, it.second) }
                 .map {
                     //Perform Add to Database
+                    var inList = 0
+                    allSpotsSubject.value?.forEach {fromList ->
+                        if (it.second.equals(fromList.spotTitle, true)){
+                            inList++
+                        }
+                    }
+                    if (inList != 0){
+                        spotInListSubject.onNext(Unit)
+                    }else{
+                        spotNotInSubject.onNext(Unit)
+                    }
+                    return@map it
                 }
+                .zipWith(spotNotInSubject)
+                .flatMap {
+                    repository
+                            .insertSpot(SpotEntity(it.first.second, it.first.first.first, it.first.first.second))
+                }
+                .share()
 
-        allSpotsStream = loadFromDatabase.map {
-            listOf<Spot>()
-        }
+
+        val dataBaseLoad = loadFromDatabase
+                .flatMap { repository.getAllWallets() }
+                .share()
+
+        allSpotsStream = dataBaseLoad.whenSuccess()
+
+        spotIsAlreadyIncluded = spotInListSubject
 
         isCurrectLocationChecked = useCurrentLocationSubject
         askForLocationStream = askForLocationSubject
@@ -110,17 +155,18 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
         randomSpotStream = randomSpotSubject.withLatestFrom(allSpotsStream)
                 .map { it.second[Random().nextInt(it.second.size)].spotTitle }
 
-        newSpotAddedStream = newSpot.map {
-            false
-        }
+        newSpotAddedStream = newSpot.whenSuccess()
+
+        errorStream = Observable
+                .merge(newSpot.whenError(), dataBaseLoad.whenError())
+
+        loadingViewModelOutput = LoadingViewModel(listOf(
+                newSpot.whenLoading(), dataBaseLoad.whenLoading()
+        ))
 
     }
 
     //region Input
-
-    override fun loadSpotsFromDatabase() {
-        loadFromDatabase.onNext(Unit)
-    }
 
     override fun addNewSpot() {
         newSpotSubject.onNext(Unit)
@@ -131,7 +177,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     }
 
     override fun showAllSpots() {
-
+        loadFromDatabase.onNext(Unit)
     }
 
     override fun showTutorial() {
@@ -147,6 +193,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     }
 
     override fun showRandomSpot() {
+        loadFromDatabase.onNext(Unit)
         randomSpotSubject.onNext(Unit)
     }
 

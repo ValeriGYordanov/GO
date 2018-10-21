@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.disposables.CompositeDisposable
 import studios.devs.mobi.model.Screen
@@ -52,8 +53,9 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     fun renderError(error: String){
-        val errorDialog = Dialog(this)
-        errorDialog.show()
+        val errorDialog = AlertDialog.Builder(this)
+        errorDialog.setMessage(error)
+        errorDialog.create().show()
     }
 
     var loadingDialog: Dialog? = null
@@ -76,12 +78,16 @@ open class BaseActivity : AppCompatActivity() {
         return intent.getSerializableExtra(PARAM_DATA)
     }
 
-    fun showToast(flag: Boolean, ifPositiveText: String, ifNegativeText: String){
+    fun showToastWithArgument(flag: Boolean, ifPositiveText: String, ifNegativeText: String){
         if (flag){
-            Toast.makeText(this, ifPositiveText, Toast.LENGTH_SHORT).show()
+            showToast(ifPositiveText)
         }else{
-            Toast.makeText(this, ifNegativeText, Toast.LENGTH_SHORT).show()
+            showToast(ifNegativeText)
         }
+    }
+
+    fun showToast(text: String){
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
     }
 
 }

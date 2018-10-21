@@ -1,25 +1,22 @@
 package studios.devs.mobi.storage
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
-import studios.devs.mobi.model.Spot
+import androidx.room.*
+import studios.devs.mobi.model.SpotEntity
 
 
 @Dao
 interface SpotDAO {
 
-    @Insert
-    fun insertSpot(spot: Spot)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    fun insertSpot(spotEntity: SpotEntity)
 
     @Update
-    fun updateSpot(spot: Spot)
+    fun updateSpot(spotEntity: SpotEntity)
 
-    @Query("SELECT * FROM spot")
-    fun getAllSpots(): List<Spot>
+    @Query("SELECT * FROM spotentity")
+    fun getAllSpots(): List<SpotEntity>
 
-    @Query("SELECT * FROM spot WHERE title LIKE :spotTitle")
-    fun getSpot(spotTitle: String): Spot
+    @Query("SELECT * FROM spotentity WHERE title LIKE :spotTitle")
+    fun getSpot(spotTitle: String): SpotEntity
 
 }
