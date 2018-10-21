@@ -1,12 +1,21 @@
 package studios.devs.mobi.ui.activities
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.Parcelable
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
 import studios.devs.mobi.MainApplication
 import studios.devs.mobi.R
 import studios.devs.mobi.databinding.ActivityOfflineSpotBinding
@@ -27,6 +36,18 @@ import javax.inject.Inject
 class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener {
 
     lateinit var binding: ActivityOfflineSpotBinding
+    private lateinit var latitude: String
+    private lateinit var longitude: String
+
+    private val locationListener: LocationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            latitude = location.latitude.toString()
+            longitude = location.longitude.toString()
+        }
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
+    }
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -41,6 +62,7 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         super.onCreate(savedInstanceState)
         MainApplication.appComponent.inject(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_offline_spot)
+        requestPermission()
     }
 
     override fun onStart() {
@@ -52,8 +74,7 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
     }
 
     fun askForLocation(){
-        showToastWithArgument(true, "AskingForLocation", "AskingForLocation")
-        //viewModel.input.locationSet("lat", "long")
+        viewModel.input.locationSet(latitude, longitude)
     }
     fun askForSpotName(){
         showToast("Title should not be null or repeated!")
@@ -79,6 +100,39 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
 
     override fun onSpotSelected(spotTitle: String) {
         showToast("Clicked on : $spotTitle")
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun setUpLocationManager() {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
+
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            showToast(getString(R.string.error_loc_unavailable))
+        } else {
+            val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (location != null) {
+                val lati = location.latitude
+                val longi = location.longitude
+                latitude = lati.toString()
+                longitude = longi.toString()
+            }
+        }
+    }
+
+    private fun requestPermission() {
+        val rxPermissions = RxPermissions(this)
+        rxPermissions
+                .request(Manifest.permission.ACCESS_FINE_LOCATION)
+                .subscribe { granted ->
+                    if (granted) {
+                        setUpLocationManager()
+                    } else {
+                        showToast(getString(R.string.permission_denial))
+                        finish()
+                    }
+                }
+                .addTo(compositeDisposable)
     }
 
 }

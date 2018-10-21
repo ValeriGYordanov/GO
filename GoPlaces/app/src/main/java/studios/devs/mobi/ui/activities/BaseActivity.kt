@@ -15,6 +15,7 @@ import java.io.Serializable
 @SuppressLint("Registered")
 open class BaseActivity : AppCompatActivity() {
 
+
     companion object {
         const val PARAM_DATA = "data"
     }
