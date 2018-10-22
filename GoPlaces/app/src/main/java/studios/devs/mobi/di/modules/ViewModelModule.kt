@@ -8,6 +8,7 @@ import dagger.multibindings.IntoMap
 import studios.devs.mobi.di.ViewModelFactory
 import studios.devs.mobi.di.ViewModelKey
 import studios.devs.mobi.viewmodels.OfflineSpotViewModel
+import studios.devs.mobi.viewmodels.OnboardingViewModel
 
 @Module
 abstract class ViewModelModule {
@@ -16,6 +17,11 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(OfflineSpotViewModel::class)
     internal abstract fun offlineSpotViewModel(offlineSpotViewModel: OfflineSpotViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(OnboardingViewModel::class)
+    internal abstract fun onboardingViewModel(onboardingViewModel: OnboardingViewModel): ViewModel
 
     @Binds
     internal abstract fun bindViewModelFactory(factory: ViewModelFactory): ViewModelProvider.Factory

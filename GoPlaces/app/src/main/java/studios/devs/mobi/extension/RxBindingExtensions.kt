@@ -13,7 +13,6 @@ var View.rxClick: Observable<Unit>
     get() = RxView.clicks(this).map { Unit }
     set(value) {}
 
-
 var EditText.rxTextChanges: Observable<String>
     get() = RxTextView.textChanges(this)
             .map { it.toString() }

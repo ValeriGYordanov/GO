@@ -34,7 +34,7 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     private fun getActivityClassFromString(activityName: String): Class<out Activity> {
-        val fullActivityNameWithPath = "studios.devs.mobi.ui.activities" + activityName + "Activity"
+        val fullActivityNameWithPath = "studios.devs.mobi.ui.activities." + activityName + "Activity"
         return Class.forName(fullActivityNameWithPath) as Class<Activity>
     }
 

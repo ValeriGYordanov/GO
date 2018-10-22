@@ -5,6 +5,7 @@ import dagger.Component
 import studios.devs.mobi.MainApplication
 import studios.devs.mobi.ui.activities.OfflineSpotActivity
 import studios.devs.mobi.di.modules.*
+import studios.devs.mobi.ui.activities.OnboardingActivity
 import javax.inject.Singleton
 
 
@@ -27,6 +28,7 @@ interface AppComponent {
 
     //region Activities
     fun inject(clazz: OfflineSpotActivity)
+    fun inject(clazz: OnboardingActivity)
     //endregion
 
 
