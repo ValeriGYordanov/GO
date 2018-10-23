@@ -13,10 +13,12 @@ import javax.inject.Inject
 
 interface OnboardingViewModelInput {
     fun goOffline()
+    fun permissionsGranted()
 }
 
 interface OnboardingViewModelOutput {
     val startOfflineScreenStream: Observable<Screen<out Serializable>>
+    val permissionsGrantedStream: Observable<Unit>
 }
 
 interface OnboardingViewModelInputOutput {
@@ -39,23 +41,31 @@ class OnboardingViewModel @Inject constructor(private val repository: IMainRepos
     //region output
 
     override val startOfflineScreenStream: Observable<Screen<out Serializable>>
+    override val permissionsGrantedStream: Observable<Unit>
 
     //endregion
 
     //region local
     private val compositeDisposable = CompositeDisposable()
     private val offlineSubject = PublishSubject.create<Unit>()
+    private val permisionsGrantedSubject = PublishSubject.create<Unit>()
     //endregion
 
     init {
         startOfflineScreenStream = offlineSubject
                 .map { Screen.OfflineSpot(null) }
+
+        permissionsGrantedStream = permisionsGrantedSubject
     }
 
     //region Input
 
     override fun goOffline() {
         offlineSubject.onNext(Unit)
+    }
+
+    override fun permissionsGranted() {
+        permisionsGrantedSubject.onNext(Unit)
     }
 
     //endregion

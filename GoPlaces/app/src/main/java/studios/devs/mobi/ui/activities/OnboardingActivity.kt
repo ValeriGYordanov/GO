@@ -1,14 +1,19 @@
 package studios.devs.mobi.ui.activities
 
+import android.Manifest
 import android.app.Dialog
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.widget.Button
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
 import studios.devs.mobi.MainApplication
 import studios.devs.mobi.R
 import studios.devs.mobi.databinding.ActivityOnboardingBinding
@@ -37,7 +42,7 @@ class OnboardingActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         MainApplication.appComponent.inject(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_onboarding)
-        //TODO: Ask for permissions here - if not granted disable buttons!
+        informationDialog()
     }
 
     override fun onStart() {
@@ -47,6 +52,34 @@ class OnboardingActivity : BaseActivity() {
                 .addTo(compositeDisposable)
     }
 
+    fun informationDialog(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            val dialog = Dialog(this)
+            dialog.setContentView(R.layout.start_information_dialog)
+            dialog.setCancelable(false)
+            dialog.findViewById<Button>(R.id.error_cancel).setOnClickListener {
+                dialog.dismiss()
+                requestPermission()
+            }
+            dialog.show()
+
+
+        }
+    }
+
+
+    private fun requestPermission() {
+        RxPermissions(this)
+                .request(Manifest.permission.ACCESS_FINE_LOCATION)
+                .subscribe { granted ->
+                    if (granted) {
+                        viewModel.input.permissionsGranted()
+                    }
+                }
+                .addTo(compositeDisposable)
+    }
 
     fun goOnline() {
         //FIXME: This is temporary dialog showing we are not yet supporting online version
@@ -58,7 +91,6 @@ class OnboardingActivity : BaseActivity() {
 
 private fun Dialog.showTheDialog() {
     this.setContentView(R.layout.online_error_dialog)
-    this.setTitle("Error")
     this.findViewById<Button>(R.id.error_cancel).setOnClickListener { this.dismiss() }
     this.show()
 }
@@ -94,6 +126,9 @@ private fun OnboardingViewModelOutput.bind(activity: OnboardingActivity): List<D
 
 private fun OnboardingViewModelOutput.bind(binding: ActivityOnboardingBinding): List<Disposable> {
     return listOf(
-
+        permissionsGrantedStream.subscribe {
+            binding.btnGoOffline.isEnabled = true
+            binding.btnGoOnline.isEnabled = true
+        }
     )
 }

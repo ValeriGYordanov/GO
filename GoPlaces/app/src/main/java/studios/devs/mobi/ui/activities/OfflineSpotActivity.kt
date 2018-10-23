@@ -44,6 +44,7 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
             latitude = location.latitude.toString()
             longitude = location.longitude.toString()
         }
+
         override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
@@ -62,7 +63,7 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         super.onCreate(savedInstanceState)
         MainApplication.appComponent.inject(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_offline_spot)
-        requestPermission()
+        setUpLocationManager()
     }
 
     override fun onStart() {
@@ -73,23 +74,26 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         viewModel.input.loadAllSpots()
     }
 
-    fun askForLocation(){
+    fun askForLocation() {
         viewModel.input.locationSet(latitude, longitude)
     }
-    fun askForSpotName(){
+
+    fun askForSpotName() {
         showToast("Title should not be null or repeated!")
     }
-    fun spotAlreadyIncluded(){
+
+    fun spotAlreadyIncluded() {
         showToast("Spot is already in list")
     }
-    fun showAllSpots(allSpots: List<SpotEntity>){
-        if (allSpots.isEmpty()){
+
+    fun showAllSpots(allSpots: List<SpotEntity>) {
+        if (allSpots.isEmpty()) {
             showToast("You haven't inserted anything, yet!")
-        }else{
+        } else {
             val allSpotssFragment = AllSpotsDialog()
             val bundle = Bundle()
             val spotTitles = arrayListOf<String>()
-            for (i in allSpots.indices){
+            for (i in allSpots.indices) {
                 spotTitles.add(allSpots[i].spotTitle)
             }
             bundle.putParcelableArrayList(SPOTS_LIST, allSpots as ArrayList<out Parcelable>)
@@ -120,20 +124,6 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         }
     }
 
-    private fun requestPermission() {
-        val rxPermissions = RxPermissions(this)
-        rxPermissions
-                .request(Manifest.permission.ACCESS_FINE_LOCATION)
-                .subscribe { granted ->
-                    if (granted) {
-                        setUpLocationManager()
-                    } else {
-                        showToast(getString(R.string.permission_denial))
-                        finish()
-                    }
-                }
-                .addTo(compositeDisposable)
-    }
 
 }
 
@@ -160,12 +150,13 @@ private fun OfflineSpotViewModelInput.bind(binding: ActivityOfflineSpotBinding):
 private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List<Disposable> {
     return listOf(
             newSpotAddedStream.observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { activity.showToast(it.spotTitle +", added!") },
+                    .subscribe { activity.showToast(it.spotTitle + ", added!") },
             askForLocationStream.subscribe { activity.askForLocation() },
             askForSpotNameStream.subscribe { activity.askForSpotName() },
             spotIsAlreadyIncluded.subscribe { activity.spotAlreadyIncluded() },
             showAllSpotsStream.observeOn(AndroidSchedulers.mainThread())
                     .subscribe { activity.showAllSpots(it) },
+            emptySpotListStream.subscribe { activity.showToast("You haven't inserted anything yet!") },
             errorStream.observeOn(AndroidSchedulers.mainThread())
                     .subscribe { activity.renderError(it.description) },
             loadingViewModelOutput.isLoading.observeOn(AndroidSchedulers.mainThread())

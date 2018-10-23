@@ -48,6 +48,7 @@ interface OfflineSpotViewModelOutput {
     val askForSpotNameStream: Observable<Unit>
     val spotIsAlreadyIncluded: Observable<Unit>
     val showAllSpotsStream: Observable<List<SpotEntity>>
+    val emptySpotListStream: Observable<Unit>
 }
 
 interface OfflineSpotViewModelInputOutput {
@@ -82,6 +83,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     override val askForSpotNameStream: Observable<Unit>
     override val spotIsAlreadyIncluded: Observable<Unit>
     override val showAllSpotsStream: Observable<List<SpotEntity>>
+    override val emptySpotListStream: Observable<Unit>
 
     //endregion
 
@@ -99,6 +101,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     private val spotInListSubject = PublishSubject.create<Unit>()
     private val spotNotInSubject = PublishSubject.create<Unit>()
     private val showAllSpotsSubject = PublishSubject.create<Unit>()
+    private val emptySpotListSubject = PublishSubject.create<Unit>()
     //endregion
 
     init {
@@ -154,6 +157,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
         isCurrectLocationChecked = useCurrentLocationSubject
         askForLocationStream = askForLocationSubject
         askForSpotNameStream = emptyNameSubject
+        emptySpotListStream = emptySpotListSubject
 
         shouldShowTutorialStream = Observable.just(false)
 
@@ -161,6 +165,10 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
                 .map { it.second }
 
         randomSpotStream = randomSpotSubject.withLatestFrom(allSpotsStream)
+                .filter{
+                    emptySpotListSubject.onNext(Unit)
+                    it.second.isNotEmpty()
+                }
                 .map { it.second[Random().nextInt(it.second.size)].spotTitle }
 
         newSpotAddedStream = newSpot.whenSuccess()
