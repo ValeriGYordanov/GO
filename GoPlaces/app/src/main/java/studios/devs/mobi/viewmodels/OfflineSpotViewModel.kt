@@ -206,6 +206,9 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     }
 
     override fun showRandomSpot() {
+        loadFromDatabase
+                .flatMap { repository.getAllWallets() }
+                .share()
         randomSpotSubject.onNext(Unit)
     }
 
