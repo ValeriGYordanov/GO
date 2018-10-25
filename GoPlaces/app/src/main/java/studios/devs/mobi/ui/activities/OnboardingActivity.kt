@@ -42,7 +42,6 @@ class OnboardingActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         MainApplication.appComponent.inject(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_onboarding)
-        informationDialog()
     }
 
     override fun onStart() {
@@ -50,9 +49,10 @@ class OnboardingActivity : BaseActivity() {
         viewModel
                 .bind(this)
                 .addTo(compositeDisposable)
+        informationDialog()
     }
 
-    fun informationDialog(){
+    private fun informationDialog(){
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
@@ -64,8 +64,8 @@ class OnboardingActivity : BaseActivity() {
                 requestPermission()
             }
             dialog.show()
-
-
+        }else{
+            viewModel.input.permissionsGranted()
         }
     }
 

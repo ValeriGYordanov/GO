@@ -18,4 +18,6 @@
     <string name="add_spot_edt">Add Place</string>
     <string name="add_spot_btn">Add This Place</string>
     <string name="use_current_location">Use Current Location</string>
+    <string name="i_understand">i understand</string>
+    <string name="info_location">GoPlaces \n needs to use the location in order to work. \n Your strict location will not be taken at anytime, but only when you want to add your facorite place in storage.</string>
 </resources>
