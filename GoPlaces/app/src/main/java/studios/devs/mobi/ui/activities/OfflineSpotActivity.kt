@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import com.jakewharton.rxbinding2.widget.text
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -86,6 +87,12 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         showToast("Spot is already in list")
     }
 
+    fun navigate(spotEntuty: SpotEntity){
+
+        // open map here
+
+    }
+
     fun showAllSpots(allSpots: List<SpotEntity>) {
         if (allSpots.isEmpty()) {
             showToast("You haven't inserted anything, yet!")
@@ -143,9 +150,11 @@ private fun OfflineSpotViewModelInput.bind(binding: ActivityOfflineSpotBinding):
             binding.btnTutorial.rxClick.subscribe { showTutorial() },
             binding.currentLocationBox.rxClick.subscribe { useCurrentLocationIsChecked() },
             binding.spotIcon.rxClick.subscribe { startNavigationToShownSpot() },
-            binding.whereBtn.rxClick.subscribe { showRandomSpot() }
+            binding.whereBtn.rxClick.subscribe { showRandomSpot() },
+            binding.spotIcon.rxClick.subscribe { navigate(binding.spotTxt.text.toString()) }
     )
 }
+
 
 private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List<Disposable> {
     return listOf(
@@ -160,7 +169,8 @@ private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List
             errorStream.observeOn(AndroidSchedulers.mainThread())
                     .subscribe { activity.renderError(it.description) },
             loadingViewModelOutput.isLoading.observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { activity.renderLoading(it) }
+                    .subscribe { activity.renderLoading(it) },
+            mapNavigationStream.subscribe{activity.navigate(it)}
     )
 }
 

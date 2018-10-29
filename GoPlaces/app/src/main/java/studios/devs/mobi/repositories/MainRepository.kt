@@ -10,6 +10,21 @@ import java.lang.Exception
 
 class MainRepository(private val appDatabase: AppDatabase) : IMainRepository {
 
+    override fun getSpotByName(name: String): Observable<Result<SpotEntity>> {
+        // implement
+        return Observable.create<Result<SpotEntity>>{ emitter->
+            try {
+                val spot = appDatabase.walletDao().getSpot(name)
+                emitter.onNext(Result.Success(spot))
+            }catch (e: Exception){
+                emitter.onNext(Result.Error(ResultError("Load from DB Failed")))
+            }
+            emitter.onComplete()
+        }
+                .startWith(Result.Loading())
+                .subscribeOn(Schedulers.io())
+    }
+
     override fun insertSpot(spotEntity: SpotEntity): Observable<Result<SpotEntity>>{
         return Observable.create<Result<SpotEntity>> { emitter->
             // TODO What should happen if insertWallet fails?

@@ -34,6 +34,7 @@ interface OfflineSpotViewModelInput {
     fun showRandomSpot()
     fun locationSet(latitude: String, longitude: String)
     fun loadAllSpots()
+    fun navigate(spotName: String)
 }
 
 interface OfflineSpotViewModelOutput {
@@ -49,6 +50,7 @@ interface OfflineSpotViewModelOutput {
     val spotIsAlreadyIncluded: Observable<Unit>
     val showAllSpotsStream: Observable<List<SpotEntity>>
     val emptySpotListStream: Observable<Unit>
+    val mapNavigationStream: Observable<SpotEntity>
 }
 
 interface OfflineSpotViewModelInputOutput {
@@ -84,6 +86,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     override val spotIsAlreadyIncluded: Observable<Unit>
     override val showAllSpotsStream: Observable<List<SpotEntity>>
     override val emptySpotListStream: Observable<Unit>
+    override val mapNavigationStream: Observable<SpotEntity>
 
     //endregion
 
@@ -102,6 +105,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     private val spotNotInSubject = PublishSubject.create<Unit>()
     private val showAllSpotsSubject = PublishSubject.create<Unit>()
     private val emptySpotListSubject = PublishSubject.create<Unit>()
+    private val mapNavigationSubject = BehaviorSubject.create<SpotEntity>()
     //endregion
 
     init {
@@ -159,6 +163,19 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
         askForSpotNameStream = emptyNameSubject
         emptySpotListStream = emptySpotListSubject
 
+
+
+
+        val dataBaseLoadSpot = loadFromDatabase
+                .flatMap { repository.getSpotByName("") }
+                .share()
+        mapNavigationStream = dataBaseLoadSpot.whenSuccess()
+
+        //mapNavigationSubject.onNext(dataBaseLoadSpot)
+
+
+
+
         shouldShowTutorialStream = Observable.just(false)
 
         showAllSpotsStream = showAllSpotsSubject.withLatestFrom(allSpotsStream)
@@ -183,6 +200,11 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     }
 
     //region Input
+
+    override fun navigate(spotName: String) {
+
+
+    }
 
     override fun addNewSpot() {
         newSpotSubject.onNext(Unit)

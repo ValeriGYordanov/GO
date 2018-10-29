@@ -10,4 +10,6 @@ interface IMainRepository {
 
     fun getAllWallets(): Observable<Result<List<SpotEntity>>>
 
+    fun getSpotByName(name: String): Observable<Result<SpotEntity>>
+
 }
