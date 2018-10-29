@@ -30,11 +30,10 @@ interface OfflineSpotViewModelInput {
     fun showAllSpots()
     fun showTutorial()
     fun useCurrentLocationIsChecked()
-    fun startNavigationToShownSpot()
     fun showRandomSpot()
     fun locationSet(latitude: String, longitude: String)
     fun loadAllSpots()
-    fun navigate(spotName: String)
+    fun navigate()
 }
 
 interface OfflineSpotViewModelOutput {
@@ -105,7 +104,9 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     private val spotNotInSubject = PublishSubject.create<Unit>()
     private val showAllSpotsSubject = PublishSubject.create<Unit>()
     private val emptySpotListSubject = PublishSubject.create<Unit>()
-    private val mapNavigationSubject = BehaviorSubject.create<SpotEntity>()
+    private val mapNavigationSubject = BehaviorSubject.create<Unit>()
+
+    private val lastSpotDisplayed = BehaviorSubject.create<SpotEntity>()
     //endregion
 
     init {
@@ -149,7 +150,6 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
                 }
                 .share()
 
-
         val dataBaseLoad = loadFromDatabase
                 .flatMap { repository.getAllWallets() }
                 .share()
@@ -163,18 +163,8 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
         askForSpotNameStream = emptyNameSubject
         emptySpotListStream = emptySpotListSubject
 
-
-
-
-        val dataBaseLoadSpot = loadFromDatabase
-                .flatMap { repository.getSpotByName("") }
-                .share()
-        mapNavigationStream = dataBaseLoadSpot.whenSuccess()
-
-        //mapNavigationSubject.onNext(dataBaseLoadSpot)
-
-
-
+        mapNavigationStream = mapNavigationSubject.withLatestFrom(lastSpotDisplayed)
+                .map { it.second }
 
         shouldShowTutorialStream = Observable.just(false)
 
@@ -186,7 +176,11 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
                     emptySpotListSubject.onNext(Unit)
                     it.second.isNotEmpty()
                 }
-                .map { it.second[Random().nextInt(it.second.size)].spotTitle }
+                .map {
+                    val randomPlace = it.second[Random().nextInt(it.second.size)]
+                    lastSpotDisplayed.onNext(randomPlace)
+                    randomPlace.spotTitle
+                }
 
         newSpotAddedStream = newSpot.whenSuccess()
 
@@ -201,9 +195,8 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
     //region Input
 
-    override fun navigate(spotName: String) {
-
-
+    override fun navigate() {
+        mapNavigationSubject.onNext(Unit)
     }
 
     override fun addNewSpot() {
@@ -229,10 +222,6 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
     override fun useCurrentLocationIsChecked() {
         useCurrentLocationSubject.flip()
-    }
-
-    override fun startNavigationToShownSpot() {
-
     }
 
     override fun showRandomSpot() {

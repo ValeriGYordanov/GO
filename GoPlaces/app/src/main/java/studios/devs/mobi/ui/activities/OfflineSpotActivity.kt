@@ -149,9 +149,8 @@ private fun OfflineSpotViewModelInput.bind(binding: ActivityOfflineSpotBinding):
             binding.btnCollectionMenu.rxClick.subscribe { showAllSpots() },
             binding.btnTutorial.rxClick.subscribe { showTutorial() },
             binding.currentLocationBox.rxClick.subscribe { useCurrentLocationIsChecked() },
-            binding.spotIcon.rxClick.subscribe { startNavigationToShownSpot() },
             binding.whereBtn.rxClick.subscribe { showRandomSpot() },
-            binding.spotIcon.rxClick.subscribe { navigate(binding.spotTxt.text.toString()) }
+            binding.spotIcon.rxClick.subscribe { navigate() }
     )
 }
 
