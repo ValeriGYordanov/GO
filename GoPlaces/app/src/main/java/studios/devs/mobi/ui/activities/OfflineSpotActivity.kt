@@ -12,6 +12,9 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.jakewharton.rxbinding2.widget.text
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -36,6 +39,8 @@ import javax.inject.Inject
 
 class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener {
 
+    lateinit var mapFragment: SupportMapFragment
+    lateinit var googleMap: GoogleMap
     lateinit var binding: ActivityOfflineSpotBinding
     private lateinit var latitude: String
     private lateinit var longitude: String
@@ -65,6 +70,7 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         MainApplication.appComponent.inject(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_offline_spot)
         setUpLocationManager()
+
     }
 
     override fun onStart() {
@@ -89,7 +95,10 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
 
     fun navigate(spotEntuty: SpotEntity){
 
-        // open map here
+        mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(OnMapReadyCallback {
+            googleMap = it
+        })
 
     }
 
