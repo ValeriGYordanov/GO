@@ -101,6 +101,8 @@ dependencies {
     implementation 'com.jakewharton.rxbinding2:rxbinding-recyclerview-v7-kotlin:2.1.1'
     implementation 'com.jakewharton.rxbinding2:rxbinding-leanback-v17-kotlin:2.1.1'
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
+    implementation 'com.google.android.gms:play-services-places:15.0.1'
+    implementation 'com.google.android.gms:play-services-location:15.0.1'
 }
 
 // Leave this at the bottom

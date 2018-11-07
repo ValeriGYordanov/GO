@@ -20,4 +20,7 @@
     <string name="use_current_location">Use Current Location</string>
     <string name="i_understand">i understand</string>
     <string name="info_location">GoPlaces \n needs to use the location in order to work. \n Your strict location will not be taken at anytime, but only when you want to add your facorite place in storage.</string>
+    <string name="already_in_list">Spot is already in list</string>
+    <string name="empty_title">Title should not be empty or repeated!</string>
+    <string name="nothing_in_list">You haven\'t inserted anything, yet!</string>
 </resources>

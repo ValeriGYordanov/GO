@@ -2,16 +2,20 @@ package studios.devs.mobi.ui.activities
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -44,6 +48,10 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
     lateinit var binding: ActivityOfflineSpotBinding
     private lateinit var latitude: String
     private lateinit var longitude: String
+
+    companion object {
+        const val PLACE_PICKER_INTENT = 1
+    }
 
     private val locationListener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
@@ -82,29 +90,26 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
     }
 
     fun askForLocation() {
-        viewModel.input.locationSet(latitude, longitude)
+        val builder = PlacePicker.IntentBuilder()
+        startActivityForResult(builder.build(this), PLACE_PICKER_INTENT)
     }
 
     fun askForSpotName() {
-        showToast("Title should not be null or repeated!")
+        showToast(getString(R.string.empty_title))
     }
 
     fun spotAlreadyIncluded() {
-        showToast("Spot is already in list")
+        showToast(getString(R.string.already_in_list))
     }
 
-    fun navigate(spotEntuty: SpotEntity){
-
-        mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(OnMapReadyCallback {
-            googleMap = it
-        })
-
+    fun navigate(spotEntity: SpotEntity) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${spotEntity.latitude},${spotEntity.longitude}"))
+        startActivity(intent)
     }
 
     fun showAllSpots(allSpots: List<SpotEntity>) {
         if (allSpots.isEmpty()) {
-            showToast("You haven't inserted anything, yet!")
+            showToast(getString(R.string.nothing_in_list))
         } else {
             val allSpotssFragment = AllSpotsDialog()
             val bundle = Bundle()
@@ -136,6 +141,17 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
                 val longi = location.longitude
                 latitude = lati.toString()
                 longitude = longi.toString()
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == PLACE_PICKER_INTENT) {
+            if (resultCode == Activity.RESULT_OK) {
+                val place = PlacePicker.getPlace(this, data)
+                latitude = place.latLng.latitude.toString()
+                longitude = place.latLng.longitude.toString()
+                viewModel.input.locationSet(latitude, longitude)
             }
         }
     }
@@ -173,12 +189,12 @@ private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List
             spotIsAlreadyIncluded.subscribe { activity.spotAlreadyIncluded() },
             showAllSpotsStream.observeOn(AndroidSchedulers.mainThread())
                     .subscribe { activity.showAllSpots(it) },
-            emptySpotListStream.subscribe { activity.showToast("You haven't inserted anything yet!") },
+            emptySpotListStream.subscribe { activity.showToast(activity.getString(R.string.nothing_in_list)) },
             errorStream.observeOn(AndroidSchedulers.mainThread())
                     .subscribe { activity.renderError(it.description) },
             loadingViewModelOutput.isLoading.observeOn(AndroidSchedulers.mainThread())
                     .subscribe { activity.renderLoading(it) },
-            mapNavigationStream.subscribe{activity.navigate(it)}
+            mapNavigationStream.subscribe { activity.navigate(it) }
     )
 }
 
