@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">GOPlaces</string>
+    <string name="app_name" translatable="false">GO</string>
     <string name="delete_dialog_title">Delete Place???</string>
     <string name="delete_dialog_text">Are you sure you want to delete : </string>
     <string name="possitive">Yes</string>
@@ -23,4 +23,7 @@
     <string name="already_in_list">Spot is already in list</string>
     <string name="empty_title">Title should not be empty or repeated!</string>
     <string name="nothing_in_list">You haven\'t inserted anything, yet!</string>
+    <string name="show_place">Show a place to GO</string>
+    <string name="add_place">Add Place</string>
+    <string name="all_my_places">All My Places</string>
 </resources>

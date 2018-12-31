@@ -10,4 +10,9 @@
     <color name="colorAccentTransparent">#7d53496c</color>
     <color name="top_green">#00ff57</color>
     <color name="colorTransparent">#00ffffff</color>
+
+    <!--Design colors-->
+    <color name="backgroundPurple">#a53e75</color>
+    <color name="backgroundBlue">#4d3591</color>
+
 </resources>

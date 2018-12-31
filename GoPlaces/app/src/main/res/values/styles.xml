@@ -48,4 +48,14 @@
         <item name="android:padding">@dimen/mid_view_distance</item>
     </style>
 
+    <style name="ButtonMainMenuStyle">
+        <item name="android:textAlignment">viewStart</item>
+        <item name="android:background">@drawable/enabled_square_button_background</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:drawablePadding">40dp</item>
+        <item name="android:layout_margin">10dp</item>
+    </style>
+
 </resources>

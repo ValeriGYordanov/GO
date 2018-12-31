@@ -78,6 +78,9 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         MainApplication.appComponent.inject(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_offline_spot)
         setUpLocationManager()
+        binding.secondTest.buttonAddPlace.setOnClickListener {
+            Toast.makeText(this, "yaaaay", Toast.LENGTH_SHORT)
+        }
 
     }
 
@@ -169,12 +172,6 @@ private fun OfflineSpotViewModelInputOutput.bind(activity: OfflineSpotActivity):
 
 private fun OfflineSpotViewModelInput.bind(binding: ActivityOfflineSpotBinding): List<Disposable> {
     return listOf(
-            binding.addSpotBtn.rxClick.subscribe { addNewSpot() },
-            binding.addSpotTxt.rxTextChanges.subscribe { newSpotText(it.trim()) },
-            binding.btnCollectionMenu.rxClick.subscribe { showAllSpots() },
-            binding.btnTutorial.rxClick.subscribe { showTutorial() },
-            binding.currentLocationBox.rxClick.subscribe { useCurrentLocationIsChecked() },
-            binding.whereBtn.rxClick.subscribe { showRandomSpot() },
             binding.spotIcon.rxClick.subscribe { navigate() }
     )
 }
@@ -200,9 +197,7 @@ private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List
 
 private fun OfflineSpotViewModelOutput.bind(binding: ActivityOfflineSpotBinding): List<Disposable> {
     return listOf(
-            shouldShowTutorialStream.subscribe { binding.btnTutorial.visibility = it.toVisibility() },
-            randomSpotStream.subscribe { binding.spotTxt.text = it },
-            isCurrectLocationChecked.subscribe { binding.currentLocationBox.isChecked = it }
+
     )
 }
 

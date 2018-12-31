@@ -38,16 +38,16 @@ ext.web3j_lib_version = '3.4.0'
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.19.0'
     testImplementation 'org.mockito:mockito-inline:2.13.0'
     testImplementation 'android.arch.core:core-testing:1.1.1'
     testImplementation 'com.tngtech.java:junit-dataprovider:1.10.0'
-    androidTestImplementation 'androidx.test:runner:1.1.0-beta02'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-beta02'
-    def room_version = "2.1.0-alpha01"
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    def room_version = "2.1.0-alpha03"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
 
@@ -88,10 +88,10 @@ dependencies {
     kapt "com.google.dagger:dagger-android-processor:$dagger2_lib_version"
 
     //Crashlytics
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.5'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.8'
 
     //Firebase Analytics
-    implementation 'com.google.firebase:firebase-core:16.0.4'
+    implementation 'com.google.firebase:firebase-core:16.0.6'
 
     //RXBinding
     implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.1.1'
@@ -101,8 +101,8 @@ dependencies {
     implementation 'com.jakewharton.rxbinding2:rxbinding-recyclerview-v7-kotlin:2.1.1'
     implementation 'com.jakewharton.rxbinding2:rxbinding-leanback-v17-kotlin:2.1.1'
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
-    implementation 'com.google.android.gms:play-services-places:15.0.1'
-    implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.google.android.gms:play-services-places:16.0.0'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
 }
 
 // Leave this at the bottom

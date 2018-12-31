@@ -28,7 +28,6 @@ interface OfflineSpotViewModelInput {
     fun addNewSpot()
     fun newSpotText(text: String)
     fun showAllSpots()
-    fun showTutorial()
     fun useCurrentLocationIsChecked()
     fun showRandomSpot()
     fun locationSet(latitude: String, longitude: String)
@@ -214,10 +213,6 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
     override fun showAllSpots() {
         showAllSpotsSubject.onNext(Unit)
-    }
-
-    override fun showTutorial() {
-
     }
 
     override fun useCurrentLocationIsChecked() {
