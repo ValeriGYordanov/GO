@@ -2,6 +2,7 @@ package studios.devs.mobi.viewmodels
 
 import androidx.lifecycle.ViewModel
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.withLatestFrom
 import io.reactivex.rxkotlin.zipWith
@@ -21,6 +22,7 @@ import studios.devs.mobi.viewmodels.base.LoadingViewModelOutput
 import java.io.Serializable
 import java.lang.Error
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
@@ -92,6 +94,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     private val compositeDisposable = CompositeDisposable()
     private val allSpotsSubject = BehaviorSubject.create<List<SpotEntity>>()
     private val loadFromDatabase = PublishSubject.create<Unit>()
+    private val loadFromDatabaseRelay = PublishSubject.create<Unit>()
     private val randomSpotSubject = PublishSubject.create<Unit>()
     private val newSpotSubject = PublishSubject.create<Unit>()
     private val newSpotNameSubject = BehaviorSubject.create<String>()
@@ -111,33 +114,27 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     init {
 
         val newSpot = newSpotSubject.withLatestFrom(useCurrentLocationSubject)
-                .map {
-                    if (!it.second){
-                        askForLocationSubject.onNext(Unit)
-                    }else{
-                        locationSubject.onNext(Pair("Current", "Location"))
-                    }
-                    return@map it.second
-                }
+                .checkLocation(locationSubject, askForLocationSubject)
                 .zipWith(locationSubject)
                 .withLatestFrom(newSpotNameSubject)
-                .filter{
-                    if (it.second.isEmpty()){
+                .filter {
+                    if (it.second.isEmpty()) {
                         emptyNameSubject.onNext(Unit)
                     }
-                    it.second.isNotEmpty() }
+                    it.second.isNotEmpty()
+                }
                 .map { return@map Pair(it.first.second, it.second) }
                 .map {
                     //Perform Add to Database
                     var inList = 0
-                    allSpotsSubject.value?.forEach {fromList ->
-                        if (it.second.equals(fromList.spotTitle, true)){
+                    allSpotsSubject.value?.forEach { fromList ->
+                        if (it.second.equals(fromList.spotTitle, true)) {
                             inList++
                         }
                     }
-                    if (inList != 0){
+                    if (inList != 0) {
                         spotInListSubject.onNext(Unit)
-                    }else{
+                    } else {
                         spotNotInSubject.onNext(Unit)
                     }
                     return@map it
@@ -149,7 +146,8 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
                 }
                 .share()
 
-        val dataBaseLoad = loadFromDatabase
+        val dataBaseLoad = Observable
+                .merge(loadFromDatabase, loadFromDatabaseRelay.delay(1, TimeUnit.SECONDS))
                 .flatMap { repository.getAllWallets() }
                 .share()
 
@@ -169,25 +167,24 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
         showAllSpotsStream = showAllSpotsSubject.withLatestFrom(allSpotsStream)
                 .map { it.second }
+                .observeOn(AndroidSchedulers.mainThread())
 
-        randomSpotStream = randomSpotSubject.withLatestFrom(allSpotsStream)
-                .filter{
-                    emptySpotListSubject.onNext(Unit)
-                    it.second.isNotEmpty()
-                }
-                .map {
-                    val randomPlace = it.second[Random().nextInt(it.second.size)]
-                    lastSpotDisplayed.onNext(randomPlace)
-                    randomPlace.spotTitle
-                }
+        randomSpotStream = randomSpotSubject
+                .withLatestFrom(allSpotsStream)
+                .checkIfListIsEmpty(emptyListAlert = emptySpotListSubject)
+                .setLastSpot(lastSpot = lastSpotDisplayed)
+                .map { it.spotTitle }
 
         newSpotAddedStream = newSpot.whenSuccess()
+                .observeOn(AndroidSchedulers.mainThread())
 
         errorStream = Observable
                 .merge(newSpot.whenError(), dataBaseLoad.whenError())
+                .observeOn(AndroidSchedulers.mainThread())
 
         loadingViewModelOutput = LoadingViewModel(listOf(
                 newSpot.whenLoading(), dataBaseLoad.whenLoading()
+                .observeOn(AndroidSchedulers.mainThread())
         ))
 
     }
@@ -200,10 +197,10 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
     override fun addNewSpot() {
         newSpotSubject.onNext(Unit)
-        loadFromDatabase.onNext(Unit)
+        loadFromDatabaseRelay.onNext(Unit)
     }
 
-    override fun loadAllSpots(){
+    override fun loadAllSpots() {
         loadFromDatabase.onNext(Unit)
     }
 
@@ -220,13 +217,10 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     }
 
     override fun showRandomSpot() {
-        loadFromDatabase
-                .flatMap { repository.getAllWallets() }
-                .share()
         randomSpotSubject.onNext(Unit)
     }
 
-    override fun locationSet(latitude: String, longitude: String){
+    override fun locationSet(latitude: String, longitude: String) {
         locationSubject.onNext(Pair(latitude, longitude))
     }
 
@@ -237,4 +231,40 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
         compositeDisposable.dispose()
     }
 
+}
+
+private fun Observable<Pair<Unit, Boolean>>.checkLocation(locationSubject: PublishSubject<Pair<String, String>>, askForLocationSubject: PublishSubject<Unit>): Observable<Boolean> {
+    return this.doOnNext {
+        if (!it.second) {
+            askForLocationSubject.onNext(Unit)
+        }
+//        else {
+//            locationSubject.onNext(Pair("Current", "Location"))
+//        }
+    }
+            .map {
+                return@map it.second
+            }
+
+}
+
+private fun Observable<List<SpotEntity>>.setLastSpot(lastSpot: BehaviorSubject<SpotEntity>): Observable<SpotEntity> {
+    return this.map {
+        val randomPlace = it[Random().nextInt(it.size)]
+        randomPlace
+    }
+            .doOnNext {
+                lastSpot.onNext(it)
+            }
+
+}
+
+private fun Observable<Pair<Unit, List<SpotEntity>>>.checkIfListIsEmpty(emptyListAlert: PublishSubject<Unit>): Observable<List<SpotEntity>> {
+    return this.doOnNext {
+        if (it.second.isEmpty()) {
+            emptyListAlert.onNext(Unit)
+        }
+    }
+            .filter { it.second.isNotEmpty() }
+            .map { it.second }
 }

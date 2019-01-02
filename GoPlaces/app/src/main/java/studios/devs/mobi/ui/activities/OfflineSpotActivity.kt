@@ -11,6 +11,7 @@ import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
+import android.view.View
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -78,9 +79,6 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         MainApplication.appComponent.inject(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_offline_spot)
         setUpLocationManager()
-        binding.secondTest.buttonAddPlace.setOnClickListener {
-            Toast.makeText(this, "yaaaay", Toast.LENGTH_SHORT)
-        }
 
     }
 
@@ -144,6 +142,7 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
                 val longi = location.longitude
                 latitude = lati.toString()
                 longitude = longi.toString()
+                viewModel.input.locationSet(latitude, longitude)
             }
         }
     }
@@ -159,6 +158,16 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         }
     }
 
+    fun switchToAddPlace(){
+        binding.optionsMenu.root.visibility = View.GONE
+        binding.addPlaceMenu.root.visibility = View.VISIBLE
+    }
+
+    fun closeAddPlace(){
+        binding.optionsMenu.root.visibility = View.VISIBLE
+        binding.addPlaceMenu.root.visibility = View.GONE
+    }
+
 
 }
 
@@ -166,38 +175,47 @@ private fun OfflineSpotViewModelInputOutput.bind(activity: OfflineSpotActivity):
     return listOf(
             output.bind(activity.binding),
             output.bind(activity),
-            input.bind(activity.binding)
+            input.bind(activity.binding),
+            activity.binding.bind(activity)
     ).flatten()
+}
+
+private fun ActivityOfflineSpotBinding.bind(activity: OfflineSpotActivity): List<Disposable>{
+    return listOf(
+            optionsMenu.buttonAddPlace.rxClick.subscribe { activity.switchToAddPlace() },
+            addPlaceMenu.closeButton.rxClick.subscribe { activity.closeAddPlace() }
+    )
 }
 
 private fun OfflineSpotViewModelInput.bind(binding: ActivityOfflineSpotBinding): List<Disposable> {
     return listOf(
-            binding.spotIcon.rxClick.subscribe { navigate() }
+            binding.mainHolder.spotIcon.rxClick.subscribe { navigate() },
+            binding.optionsMenu.buttonPlaceToGo.rxClick.subscribe { showRandomSpot() },
+            binding.optionsMenu.buttonAllPlaces.rxClick.subscribe { showAllSpots() },
+            binding.addPlaceMenu.addSpotTxt.rxTextChanges.subscribe { newSpotText(it) },
+            binding.addPlaceMenu.addSpotBtn.rxClick.subscribe { addNewSpot() },
+            binding.addPlaceMenu.currentLocationBox.rxClick.subscribe { useCurrentLocationIsChecked() }
     )
 }
 
 
 private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List<Disposable> {
     return listOf(
-            newSpotAddedStream.observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { activity.showToast(it.spotTitle + ", added!") },
+            newSpotAddedStream.subscribe { activity.showToast(it.spotTitle + ", added!") },
             askForLocationStream.subscribe { activity.askForLocation() },
             askForSpotNameStream.subscribe { activity.askForSpotName() },
             spotIsAlreadyIncluded.subscribe { activity.spotAlreadyIncluded() },
-            showAllSpotsStream.observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { activity.showAllSpots(it) },
+            showAllSpotsStream.subscribe { activity.showAllSpots(it) },
             emptySpotListStream.subscribe { activity.showToast(activity.getString(R.string.nothing_in_list)) },
-            errorStream.observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { activity.renderError(it.description) },
-            loadingViewModelOutput.isLoading.observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { activity.renderLoading(it) },
+            errorStream.subscribe { activity.renderError(it.description) },
+            loadingViewModelOutput.isLoading.subscribe { activity.renderLoading(it) },
             mapNavigationStream.subscribe { activity.navigate(it) }
     )
 }
 
 private fun OfflineSpotViewModelOutput.bind(binding: ActivityOfflineSpotBinding): List<Disposable> {
     return listOf(
-
+            randomSpotStream.subscribe { binding.mainHolder.placeResultText.text = it }
     )
 }
 

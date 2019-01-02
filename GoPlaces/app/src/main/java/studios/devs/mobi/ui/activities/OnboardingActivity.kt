@@ -91,6 +91,7 @@ class OnboardingActivity : BaseActivity() {
 
 private fun Dialog.showTheDialog() {
     this.setContentView(R.layout.online_error_dialog)
+    this.window?.setBackgroundDrawableResource(R.color.colorPartlyTransparent)
     this.findViewById<Button>(R.id.error_cancel).setOnClickListener { this.dismiss() }
     this.show()
 }

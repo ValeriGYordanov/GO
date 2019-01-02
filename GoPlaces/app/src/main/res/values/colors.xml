@@ -7,8 +7,9 @@
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorBlack">#000000</color>
     <color name="colorBlackLighter">#313131</color>
-    <color name="colorAccentTransparent">#7d53496c</color>
+    <color name="colorAccentTransparent">#3453496c</color>
     <color name="top_green">#00ff57</color>
+    <color name="colorPartlyTransparent">#64ffffff</color>
     <color name="colorTransparent">#00ffffff</color>
 
     <!--Design colors-->

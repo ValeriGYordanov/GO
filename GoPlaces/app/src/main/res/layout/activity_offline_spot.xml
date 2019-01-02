@@ -7,29 +7,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/spot_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/app_logo_pure"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.3"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/place_result_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/large_text"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/spot_icon" />
+        <include
+            android:id="@+id/main_holder"
+            layout="@layout/main_holder"
+            />
 
         <LinearLayout
-            android:id="@+id/fragment_holder"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:gravity="center"
@@ -39,12 +22,12 @@
             app:layout_constraintTop_toBottomOf="@id/place_result_text">
 
             <include
-                android:id="@+id/first_test"
+                android:id="@+id/add_place_menu"
                 android:visibility="gone"
                 layout="@layout/add_place_fragment"/>
 
             <include
-                android:id="@+id/second_test"
+                android:id="@+id/options_menu"
                 layout="@layout/offline_options_fragment" />
         </LinearLayout>
 

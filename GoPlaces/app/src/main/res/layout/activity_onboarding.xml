@@ -47,7 +47,7 @@
                 android:layout_marginBottom="@dimen/mid_view_distance"
                 android:layout_marginTop="@dimen/min_view_distance"
                 android:gravity="center"
-                android:text="The place to be application."
+                android:text="The place to be..."
                 android:textColor="@color/colorPrimary"
                 android:textSize="15sp"
                 />

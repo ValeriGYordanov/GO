@@ -26,4 +26,5 @@
     <string name="show_place">Show a place to GO</string>
     <string name="add_place">Add Place</string>
     <string name="all_my_places">All My Places</string>
+    <string name="add">ADD</string>
 </resources>
