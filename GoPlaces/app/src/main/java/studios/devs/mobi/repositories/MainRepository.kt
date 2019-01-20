@@ -1,8 +1,10 @@
 package studios.devs.mobi.repositories
 
+import android.database.sqlite.SQLiteConstraintException
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import studios.devs.mobi.model.SpotEntity
+import studios.devs.mobi.model.result.DatabaseException
 import studios.devs.mobi.model.result.Result
 import studios.devs.mobi.model.result.ResultError
 import studios.devs.mobi.storage.AppDatabase
@@ -17,7 +19,7 @@ class MainRepository(private val appDatabase: AppDatabase) : IMainRepository {
                 val spot = appDatabase.walletDao().getSpot(name)
                 emitter.onNext(Result.Success(spot))
             }catch (e: Exception){
-                emitter.onNext(Result.Error(ResultError("Load from DB Failed")))
+                emitter.onNext(Result.Error(DatabaseException.LoadingFailed()))
             }
             emitter.onComplete()
         }
@@ -32,7 +34,9 @@ class MainRepository(private val appDatabase: AppDatabase) : IMainRepository {
                 appDatabase.walletDao().insertSpot(spotEntity)
                 emitter.onNext(Result.Success(spotEntity))
             }catch (e: Exception){
-                emitter.onNext(Result.Error(ResultError("Insertion In DB Failed")))
+                if (e is SQLiteConstraintException){
+                    emitter.onNext(Result.Error(DatabaseException.DuplicateName()))
+                }
             }
             emitter.onComplete()
         }

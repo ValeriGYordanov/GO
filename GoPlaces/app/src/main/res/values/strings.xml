@@ -15,7 +15,7 @@
     <string name="error_loc_unavailable">NO LOCATION AVAILABLE</string>
     <string name="tutorial_btn">Tutorial</string>
     <string name="Where_Btn">Where?!</string>
-    <string name="add_spot_edt">Add Place</string>
+    <string name="add_spot_edt">Your place name</string>
     <string name="add_spot_btn">Add This Place</string>
     <string name="use_current_location">Use Current Location</string>
     <string name="i_understand">i understand</string>

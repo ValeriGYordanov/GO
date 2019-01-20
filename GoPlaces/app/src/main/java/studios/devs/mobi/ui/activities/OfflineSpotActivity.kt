@@ -41,6 +41,7 @@ import studios.devs.mobi.viewmodels.OfflineSpotViewModelInputOutput
 import studios.devs.mobi.viewmodels.OfflineSpotViewModelOutput
 import java.util.ArrayList
 import javax.inject.Inject
+import kotlin.jvm.java
 
 class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener {
 
@@ -49,6 +50,7 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
     lateinit var binding: ActivityOfflineSpotBinding
     private lateinit var latitude: String
     private lateinit var longitude: String
+    private var addPlaceIsShown: Boolean = false
 
     companion object {
         const val PLACE_PICKER_INTENT = 1
@@ -90,6 +92,14 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         viewModel.input.loadAllSpots()
     }
 
+    override fun onBackPressed() {
+        if (addPlaceIsShown) {
+            closeAddPlace()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     fun askForLocation() {
         val builder = PlacePicker.IntentBuilder()
         startActivityForResult(builder.build(this), PLACE_PICKER_INTENT)
@@ -125,7 +135,7 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
     }
 
     override fun onSpotSelected(spotTitle: String) {
-        showToast("Clicked on : $spotTitle")
+        viewModel.input.navigateToConcreteSpot(spotTitle)
     }
 
     @SuppressLint("MissingPermission")
@@ -158,12 +168,15 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         }
     }
 
-    fun switchToAddPlace(){
+    fun switchToAddPlace() {
+        addPlaceIsShown = true
         binding.optionsMenu.root.visibility = View.GONE
         binding.addPlaceMenu.root.visibility = View.VISIBLE
     }
 
-    fun closeAddPlace(){
+    fun closeAddPlace() {
+        viewModel.input.loadAllSpots()
+        binding.addPlaceMenu.addSpotTxt.text?.clear()
         binding.optionsMenu.root.visibility = View.VISIBLE
         binding.addPlaceMenu.root.visibility = View.GONE
     }
@@ -180,7 +193,7 @@ private fun OfflineSpotViewModelInputOutput.bind(activity: OfflineSpotActivity):
     ).flatten()
 }
 
-private fun ActivityOfflineSpotBinding.bind(activity: OfflineSpotActivity): List<Disposable>{
+private fun ActivityOfflineSpotBinding.bind(activity: OfflineSpotActivity): List<Disposable> {
     return listOf(
             optionsMenu.buttonAddPlace.rxClick.subscribe { activity.switchToAddPlace() },
             addPlaceMenu.closeButton.rxClick.subscribe { activity.closeAddPlace() }
