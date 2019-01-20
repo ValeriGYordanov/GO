@@ -175,6 +175,7 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
     }
 
     fun closeAddPlace() {
+        addPlaceIsShown = false
         viewModel.input.loadAllSpots()
         binding.addPlaceMenu.addSpotTxt.text?.clear()
         binding.optionsMenu.root.visibility = View.VISIBLE

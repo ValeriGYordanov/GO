@@ -113,6 +113,13 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
     init {
 
+        /*
+        FIX:
+        1.Change the order - first take the name or ask for name if none is inserted
+        2.Ask for location - Check if the current location is checked if it is use current location
+        if not - ask for location and use the given location.
+        3.Proceed with insertion.
+         */
         val newSpot = newSpotSubject.withLatestFrom(useCurrentLocationSubject)
                 .checkLocation(askForLocationSubject)
                 .zipWith(locationSubject)
