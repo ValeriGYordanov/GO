@@ -1,70 +1,59 @@
 package studios.devs.mobi.ui.activities
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.gms.location.*
 import com.google.android.gms.location.places.ui.PlacePicker
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.jakewharton.rxbinding2.widget.text
-import com.tbruyelle.rxpermissions2.RxPermissions
-import io.reactivex.android.schedulers.AndroidSchedulers
+import com.google.android.gms.tasks.OnSuccessListener
 import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.addTo
 import studios.devs.mobi.MainApplication
 import studios.devs.mobi.R
 import studios.devs.mobi.databinding.ActivityOfflineSpotBinding
 import studios.devs.mobi.extension.addTo
 import studios.devs.mobi.extension.rxClick
 import studios.devs.mobi.extension.rxTextChanges
-import studios.devs.mobi.extension.toVisibility
 import studios.devs.mobi.model.SpotEntity
 import studios.devs.mobi.ui.dialogs.AllSpotsDialog
 import studios.devs.mobi.ui.dialogs.SPOTS_LIST
+import studios.devs.mobi.utils.GpsUtils
 import studios.devs.mobi.viewmodels.OfflineSpotViewModel
 import studios.devs.mobi.viewmodels.OfflineSpotViewModelInput
 import studios.devs.mobi.viewmodels.OfflineSpotViewModelInputOutput
 import studios.devs.mobi.viewmodels.OfflineSpotViewModelOutput
-import java.util.ArrayList
+import java.util.*
 import javax.inject.Inject
 import kotlin.jvm.java
 
-class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener {
+class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener, OnSuccessListener<Location>, GpsUtils.onGpsListener {
 
-    lateinit var mapFragment: SupportMapFragment
-    lateinit var googleMap: GoogleMap
+    override fun gpsStatus(isGPSEnable: Boolean) {
+        isGPS = isGPSEnable
+    }
+
+    override fun onSuccess(location: Location?) {
+        location?.let {
+            viewModel.input.currentLocationSet(it.latitude.toString(), it.longitude.toString())
+        }
+    }
+
     lateinit var binding: ActivityOfflineSpotBinding
-    private lateinit var latitude: String
-    private lateinit var longitude: String
     private var addPlaceIsShown: Boolean = false
+    private lateinit var locationClient: FusedLocationProviderClient
+    private lateinit var locationRequest: LocationRequest
+    private lateinit var locationCallback: LocationCallback
+    private var isGPS = false
 
     companion object {
         const val PLACE_PICKER_INTENT = 1
-    }
-
-    private val locationListener: LocationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            latitude = location.latitude.toString()
-            longitude = location.longitude.toString()
-        }
-
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-        override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) {}
     }
 
     @Inject
@@ -80,8 +69,33 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         super.onCreate(savedInstanceState)
         MainApplication.appComponent.inject(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_offline_spot)
-        setUpLocationManager()
+        setUpLocationListener()
+    }
 
+    @SuppressLint("MissingPermission")
+    private fun setUpLocationListener() {
+        locationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        locationRequest = LocationRequest.create()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest.interval = 20 * 1000
+        locationRequest.fastestInterval = 5 * 1000
+
+        object : GpsUtils(this@OfflineSpotActivity){}.turnGPSOn(this)
+
+        locationCallback = object: LocationCallback() {
+            override fun onLocationResult(result: LocationResult?) {
+                if (result == null) {
+                    return
+                }
+                for (location in result.locations) {
+                    onSuccess(location)
+                }
+            }
+        }
+
+        locationClient.lastLocation.addOnSuccessListener(this)
+        locationClient.requestLocationUpdates(locationRequest, locationCallback, null)
     }
 
     override fun onStart() {
@@ -138,32 +152,14 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener 
         viewModel.input.navigateToConcreteSpot(spotTitle)
     }
 
-    @SuppressLint("MissingPermission")
-    private fun setUpLocationManager() {
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
-
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            showToast(getString(R.string.error_loc_unavailable))
-        } else {
-            val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            if (location != null) {
-                val lati = location.latitude
-                val longi = location.longitude
-                latitude = lati.toString()
-                longitude = longi.toString()
-                viewModel.input.locationSet(latitude, longitude)
-            }
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == PLACE_PICKER_INTENT) {
             if (resultCode == Activity.RESULT_OK) {
                 val place = PlacePicker.getPlace(this, data)
-                latitude = place.latLng.latitude.toString()
-                longitude = place.latLng.longitude.toString()
-                viewModel.input.locationSet(latitude, longitude)
+                viewModel.input
+                        .explicitLocationSet(
+                                latitude = place.latLng.latitude.toString(),
+                                longitude = place.latLng.longitude.toString())
             }
         }
     }

@@ -17,11 +17,8 @@ import studios.devs.mobi.model.SpotEntity
 import studios.devs.mobi.model.result.IResultError
 import studios.devs.mobi.model.result.Result
 import studios.devs.mobi.repositories.IMainRepository
-import studios.devs.mobi.ui.dialogs.AllSpotsDialog
 import studios.devs.mobi.viewmodels.base.LoadingViewModel
 import studios.devs.mobi.viewmodels.base.LoadingViewModelOutput
-import java.io.Serializable
-import java.lang.Error
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -33,7 +30,8 @@ interface OfflineSpotViewModelInput {
     fun showAllSpots()
     fun useCurrentLocationIsChecked()
     fun showRandomSpot()
-    fun locationSet(latitude: String, longitude: String)
+    fun currentLocationSet(latitude: String, longitude: String)
+    fun explicitLocationSet(latitude: String, longitude: String)
     fun loadAllSpots()
     fun navigate()
     fun navigateToConcreteSpot(spotname: String)
@@ -101,7 +99,8 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     private val newSpotNameSubject = BehaviorSubject.create<String>()
     private val useCurrentLocationSubject = BehaviorSubject.createDefault(false)
     private val askForLocationSubject = PublishSubject.create<Unit>()
-    private val locationSubject = PublishSubject.create<Pair<String, String>>()
+    private val currentLocationSubject = PublishSubject.create<Pair<String, String>>()
+    private val explicitLocationSubject = PublishSubject.create<Pair<String, String>>()
     private val emptyNameSubject = PublishSubject.create<Unit>()
     private val spotInListSubject = PublishSubject.create<Unit>()
     private val showAllSpotsSubject = PublishSubject.create<Unit>()
@@ -120,25 +119,35 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
         if not - ask for location and use the given location.
         3.Proceed with insertion.
          */
-        val newSpot = newSpotSubject.withLatestFrom(useCurrentLocationSubject)
-                .checkLocation(askForLocationSubject)
-                .zipWith(locationSubject)
+        val spotName = newSpotSubject
                 .withLatestFrom(newSpotNameSubject)
+                .map { it.second }
                 .filter {
-                    if (it.second.isEmpty()) {
+                    if (it.isEmpty()){
                         emptyNameSubject.onNext(Unit)
                     }
-                    it.second.isNotEmpty()
+                it.isNotEmpty()
                 }
-                .map { return@map Pair(it.first.second, it.second) }
-                .flatMap {
-                    repository.insertSpot(
-                                    SpotEntity(
-                                            spotTitle = it.second,
-                                            latitude = it.first.first,
-                                            longitude = it.first.second))
-                }
-                .share()
+
+        val newSpotCurrentLocation = newSpotSubject
+                .withLatestFrom(useCurrentLocationSubject)
+                .checkLocation(askForLocationSubject)
+                .filter{ it }
+                .withLatestFrom(currentLocationSubject)
+                .map { it.second }
+                .addSpotToDatabase(spotName, repository)
+
+
+        val newSpotExplicitLocation = newSpotSubject
+                .withLatestFrom(useCurrentLocationSubject)
+                .map { it.second }
+                .filter { !it}
+                .zipWith(explicitLocationSubject)
+                .map { it.second }
+                .addSpotToDatabase(spotName, repository)
+
+        val newSpot = Observable.merge(newSpotCurrentLocation, newSpotExplicitLocation)
+
 
         val dataBaseLoad = Observable
                 .merge(loadFromDatabase, loadFromDatabaseRelay.delay(300, TimeUnit.MILLISECONDS))
@@ -223,8 +232,12 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
         randomSpotSubject.onNext(Unit)
     }
 
-    override fun locationSet(latitude: String, longitude: String) {
-        locationSubject.onNext(Pair(latitude, longitude))
+    override fun currentLocationSet(latitude: String, longitude: String) {
+        currentLocationSubject.onNext(Pair(latitude, longitude))
+    }
+
+    override fun explicitLocationSet(latitude: String, longitude: String) {
+        explicitLocationSubject.onNext(Pair(latitude, longitude))
     }
 
     override fun navigateToConcreteSpot(spotname: String) {
@@ -238,6 +251,19 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
         compositeDisposable.dispose()
     }
 
+}
+
+private fun Observable<Pair<String, String>>.addSpotToDatabase(spotNameStream: Observable<String>, repository: IMainRepository): Observable<Result<SpotEntity>> {
+    return this
+            .withLatestFrom(spotNameStream)
+            .flatMap {
+                repository.insertSpot(
+                        SpotEntity(
+                                spotTitle = it.second,
+                                latitude = it.first.first,
+                                longitude = it.first.second))
+            }
+            .share()
 }
 
 private fun Observable<Pair<Unit, Boolean>>.checkLocation(askForLocationSubject: PublishSubject<Unit>): Observable<Boolean> {
