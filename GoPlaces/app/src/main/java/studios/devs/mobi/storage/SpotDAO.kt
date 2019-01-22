@@ -19,4 +19,7 @@ interface SpotDAO {
     @Query("SELECT * FROM spotentity WHERE title LIKE :spotTitle")
     fun getSpot(spotTitle: String): SpotEntity
 
+    @Query("DELETE FROM spotentity WHERE title LIKE :spotTitle")
+    fun deleteSpot(spotTitle: String)
+
 }

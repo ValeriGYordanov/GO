@@ -12,4 +12,6 @@ interface IMainRepository {
 
     fun getSpotByName(name: String): Observable<Result<SpotEntity>>
 
+    fun deleteSpotByName(name: String)
+
 }

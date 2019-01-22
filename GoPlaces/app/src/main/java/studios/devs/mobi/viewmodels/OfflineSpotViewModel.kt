@@ -148,7 +148,6 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
         val newSpot = Observable.merge(newSpotCurrentLocation, newSpotExplicitLocation)
 
-
         val dataBaseLoad = Observable
                 .merge(loadFromDatabase, loadFromDatabaseRelay.delay(300, TimeUnit.MILLISECONDS))
                 .flatMap { repository.getAllWallets() }

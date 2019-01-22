@@ -29,7 +29,6 @@ class MainRepository(private val appDatabase: AppDatabase) : IMainRepository {
 
     override fun insertSpot(spotEntity: SpotEntity): Observable<Result<SpotEntity>>{
         return Observable.create<Result<SpotEntity>> { emitter->
-            // TODO What should happen if insertWallet fails?
             try {
                 appDatabase.walletDao().insertSpot(spotEntity)
                 emitter.onNext(Result.Success(spotEntity))
@@ -56,5 +55,9 @@ class MainRepository(private val appDatabase: AppDatabase) : IMainRepository {
                 .subscribeOn(Schedulers.io())
     }
 
+
+    override fun deleteSpotByName(name: String) {
+        appDatabase.walletDao().deleteSpot(name)
+    }
 
 }
