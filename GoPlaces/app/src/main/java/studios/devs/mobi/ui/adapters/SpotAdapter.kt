@@ -3,6 +3,7 @@ package studios.devs.mobi.ui.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import studios.devs.mobi.R
@@ -30,9 +31,14 @@ class SpotAdapter(val dialog: AllSpotsDialog,
             dialog.dismiss()
             selected.onSpotSelected(title!!)
         }
+        holder.deleteSpotButton.setOnClickListener { _ ->
+            dialog.dismiss()
+            selected.onSpotDeleted(title!!)
+        }
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val textViewSpotTitle = itemView.findViewById(R.id.all_spots_txt) as TextView
+        val deleteSpotButton = itemView.findViewById<ImageView>(R.id.delete_spot_btn);
     }
 }

@@ -152,6 +152,10 @@ class OfflineSpotActivity : BaseActivity(), AllSpotsDialog.SelectedSpotListener,
         viewModel.input.navigateToConcreteSpot(spotTitle)
     }
 
+    override fun onSpotDeleted(spotTitle: String) {
+        viewModel.input.deleteSpot(spotTitle)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == PLACE_PICKER_INTENT) {
             if (resultCode == Activity.RESULT_OK) {
@@ -219,7 +223,8 @@ private fun OfflineSpotViewModelOutput.bind(activity: OfflineSpotActivity): List
             emptySpotListStream.subscribe { activity.showToast(activity.getString(R.string.nothing_in_list)) },
             errorStream.subscribe { activity.renderError(it.description) },
             loadingViewModelOutput.isLoading.subscribe { activity.renderLoading(it) },
-            mapNavigationStream.subscribe { activity.navigate(it) }
+            mapNavigationStream.subscribe { activity.navigate(it) },
+            spotDeleted.subscribe { activity.showToast(activity.getString(R.string.deleted_success)) }
     )
 }
 

@@ -31,6 +31,16 @@
             android:layout_marginStart="10dp"
             />
 
+        <ImageView
+            android:id="@+id/delete_spot_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignTop="@+id/all_spots_txt"
+            android:layout_alignBottom="@+id/all_spots_txt"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:src="@android:drawable/ic_delete" />
+
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

@@ -8,10 +8,10 @@ interface IMainRepository {
 
     fun insertSpot(spotEntity: SpotEntity): Observable<Result<SpotEntity>>
 
-    fun getAllWallets(): Observable<Result<List<SpotEntity>>>
+    fun getAllSpots(): Observable<Result<List<SpotEntity>>>
 
     fun getSpotByName(name: String): Observable<Result<SpotEntity>>
 
-    fun deleteSpotByName(name: String)
+    fun deleteSpotByName(name: String): Observable<Result<Unit>>
 
 }

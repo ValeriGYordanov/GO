@@ -35,6 +35,7 @@ interface OfflineSpotViewModelInput {
     fun loadAllSpots()
     fun navigate()
     fun navigateToConcreteSpot(spotname: String)
+    fun deleteSpot(title: String)
 }
 
 interface OfflineSpotViewModelOutput {
@@ -51,6 +52,7 @@ interface OfflineSpotViewModelOutput {
     val showAllSpotsStream: Observable<List<SpotEntity>>
     val emptySpotListStream: Observable<Unit>
     val mapNavigationStream: Observable<SpotEntity>
+    val spotDeleted: Observable<Unit>
 }
 
 interface OfflineSpotViewModelInputOutput {
@@ -87,6 +89,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     override val showAllSpotsStream: Observable<List<SpotEntity>>
     override val emptySpotListStream: Observable<Unit>
     override val mapNavigationStream: Observable<SpotEntity>
+    override val spotDeleted: Observable<Unit>
 
     //endregion
 
@@ -108,6 +111,7 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
     private val mapNavigationSubject = PublishSubject.create<Unit>()
     private val navigationSubject = PublishSubject.create<String>()
     private val lastSpotDisplayed = BehaviorSubject.create<SpotEntity>()
+    private val deleteSubject = PublishSubject.create<String>()
     //endregion
 
     init {
@@ -148,12 +152,16 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
         val newSpot = Observable.merge(newSpotCurrentLocation, newSpotExplicitLocation)
 
+        val deleteSpot = deleteSubject.flatMap { repository.deleteSpotByName(it) }
+
         val dataBaseLoad = Observable
                 .merge(loadFromDatabase, loadFromDatabaseRelay.delay(300, TimeUnit.MILLISECONDS))
-                .flatMap { repository.getAllWallets() }
+                .flatMap { repository.getAllSpots() }
                 .share()
 
         allSpotsStream = dataBaseLoad.whenSuccess()
+                .map { it }
+                .share()
 
         spotIsAlreadyIncluded = spotInListSubject
 
@@ -190,13 +198,17 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
                 .observeOn(AndroidSchedulers.mainThread())
 
         errorStream = Observable
-                .merge(newSpot.whenError(), dataBaseLoad.whenError())
+                .merge(newSpot.whenError(), dataBaseLoad.whenError(), deleteSpot.whenError())
                 .observeOn(AndroidSchedulers.mainThread())
 
         loadingViewModelOutput = LoadingViewModel(listOf(
-                newSpot.whenLoading(), dataBaseLoad.whenLoading()
+                newSpot.whenLoading(), dataBaseLoad.whenLoading(), deleteSpot.whenLoading()
                 .observeOn(AndroidSchedulers.mainThread())
         ))
+
+        spotDeleted = deleteSpot.whenSuccess()
+                .doOnNext { loadFromDatabaseRelay.onNext(Unit) }
+                .observeOn(AndroidSchedulers.mainThread())
 
     }
 
@@ -241,6 +253,10 @@ class OfflineSpotViewModel @Inject constructor(private val repository: IMainRepo
 
     override fun navigateToConcreteSpot(spotname: String) {
         navigationSubject.onNext(spotname)
+    }
+
+    override fun deleteSpot(title: String) {
+        deleteSubject.onNext(title)
     }
 
     //endregion

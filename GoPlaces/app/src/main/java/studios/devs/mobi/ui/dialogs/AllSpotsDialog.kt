@@ -17,6 +17,7 @@ class AllSpotsDialog: DialogFragment() {
 
     interface SelectedSpotListener {
         fun onSpotSelected(spotTitle: String)
+        fun onSpotDeleted(spotTitle: String)
     }
 
     var spotTitles: List<SpotEntity>? = null

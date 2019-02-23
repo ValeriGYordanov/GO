@@ -45,7 +45,7 @@ class MainRepository(private val appDatabase: AppDatabase) : IMainRepository {
     }
 
 
-    override fun getAllWallets(): Observable<Result<List<SpotEntity>>> {
+    override fun getAllSpots(): Observable<Result<List<SpotEntity>>> {
         return Observable.create<Result<List<SpotEntity>>> { emitter ->
             val allWallets = appDatabase.walletDao().getAllSpots()
             emitter.onNext(Result.Success(allWallets))
@@ -56,8 +56,16 @@ class MainRepository(private val appDatabase: AppDatabase) : IMainRepository {
     }
 
 
-    override fun deleteSpotByName(name: String) {
-        appDatabase.walletDao().deleteSpot(name)
+    override fun deleteSpotByName(name: String): Observable<Result<Unit>> {
+        return Observable.create<Result<Unit>> { emitter ->
+            appDatabase.walletDao().deleteSpot(name)
+            emitter.onNext(Result.Success(Unit))
+            emitter.onComplete()
+        }
+                .onErrorReturn { Result.Error(DatabaseException.DeleteError()) }
+                .startWith(Result.Loading())
+                .subscribeOn(Schedulers.io())
+
     }
 
 }
