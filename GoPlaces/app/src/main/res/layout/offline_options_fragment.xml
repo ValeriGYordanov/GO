@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button_place_to_go"
+            android:drawableStart="@drawable/ic_location"
+            android:text="@string/show_place"
+            style="@style/ButtonMainMenuStyle" />
+
+        <Button
+            android:id="@+id/button_add_place"
+            android:drawableStart="@drawable/ic_add_circle"
+            android:text="@string/add_place"
+            style="@style/ButtonMainMenuStyle" />
+
+        <Button
+            android:id="@+id/button_all_places"
+            android:drawableStart="@drawable/ic_star"
+            android:text="@string/all_my_places"
+            style="@style/ButtonMainMenuStyle" />
+
+
+    </LinearLayout>
+</layout>

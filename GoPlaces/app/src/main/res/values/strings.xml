@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name" translatable="false">GO</string>
+    <string name="delete_dialog_title">Delete Place???</string>
+    <string name="delete_dialog_text">Are you sure you want to delete : </string>
+    <string name="possitive">Yes</string>
+    <string name="negative">No</string>
+    <string name="delete_dialog_success">Place removed</string>
+    <string name="delete_dialog_empty_spot">No spot selected</string>
+    <string name="missing_spot_title">Type a Place title, please!</string>
+    <string name="spot_already_in_list">, is already in the list. Add new one!</string>
+    <string name="spot_successfuly_added">, added!</string>
+    <string name="no_permission_granted">No permission granted</string>
+    <string name="empty_field">You haven\'t inserted anything yet!</string>
+    <string name="permission_denial">Permission to location denied, please try again!</string>
+    <string name="error_loc_unavailable">NO LOCATION AVAILABLE</string>
+    <string name="tutorial_btn">Tutorial</string>
+    <string name="Where_Btn">Where?!</string>
+    <string name="add_spot_edt">Your place name</string>
+    <string name="add_spot_btn">Add This Place</string>
+    <string name="use_current_location">Use Current Location</string>
+    <string name="i_understand">i understand</string>
+    <string name="info_location">GoPlaces \n needs to use the location in order to work. \n Your strict location will not be taken at anytime, but only when you want to add your facorite place in storage.</string>
+    <string name="already_in_list">Spot is already in list</string>
+    <string name="empty_title">Title should not be empty or repeated!</string>
+    <string name="nothing_in_list">You haven\'t inserted anything, yet!</string>
+    <string name="show_place">Show a place to GO</string>
+    <string name="add_place">Add Place</string>
+    <string name="all_my_places">All My Places</string>
+    <string name="add">ADD</string>
+    <string name="deleted_success">Spot deleted successfully</string>
+</resources>

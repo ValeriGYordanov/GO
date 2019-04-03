@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="mid_view_distance">20dp</dimen>
+    <dimen name="min_view_distance">8dp</dimen>
+    <dimen name="large_text">30sp</dimen>
+    <dimen name="medium_text">20sp</dimen>
+    <dimen name="large_view_distance">40dp</dimen>
+    <dimen name="extra_large_view_distance">60dp</dimen>
+    <dimen name="onboard_button_margin">50dp</dimen>
+</resources>

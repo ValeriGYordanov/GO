@@ -54,3 +54,5 @@ freeline.py
 freeline/
 freeline_project_description.json
 /WhereToGo/.idea/caches/*.ser
+/.classpath
+/.project
