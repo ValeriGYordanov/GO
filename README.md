@@ -34,13 +34,10 @@ It is only visible if you don't have places in your list!
 # Sample Images
 
 <p align="center">
-  <img src="https://github.com/ValeriJordanov/WhereToGo/blob/develop/Samples/sample_v_1.0a.png" width="300"/>
-  <img src="https://github.com/ValeriJordanov/WhereToGo/blob/develop/Samples/sample_v_1.0b.png" width="300"/>
-  <img src="https://github.com/ValeriJordanov/WhereToGo/blob/develop/Samples/sample_v_1.0c.png" width="300"/>
+  <img src="https://github.com/ValeriJordanov/WhereToGo/blob/develop/Samples/sample_v_2.0a1.jpg" width="300"/>
+  <img src="https://github.com/ValeriJordanov/WhereToGo/blob/develop/Samples/sample_v_2.0a2.jpg" width="300"/>
+  <img src="https://github.com/ValeriJordanov/WhereToGo/blob/develop/Samples/sample_v_2.0a3.jpg" width="300"/>
+  <img src="https://github.com/ValeriJordanov/WhereToGo/blob/develop/Samples/sample_v_2.0a4.jpg" width="300"/>
+  <img src="https://github.com/ValeriJordanov/WhereToGo/blob/develop/Samples/sample_v_2.0a5.jpg" width="300"/>
 </p>
  
-# Sample Tutorial
-
-<p align="center">
-  <img src="https://github.com/ValeriJordanov/WhereToGo/blob/develop/Samples/sample_tutorial_v_1.0.gif" width="300"/>
-</p>
