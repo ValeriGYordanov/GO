@@ -5,7 +5,7 @@ We bet you have at least once wondered where to go with your friends tonigh... T
 at home or perhaps a movie? 
 Aren't you tired of this? Do you want the fate to decide where you go - Well this is the application for you!
 
-# Version 1.0
+# Version 2.0.0
 It asks you to insert at least one place in the first hand - REMEMBER: Insert places only when you are at the
 exact place location so you can be sure that the navi will guide you correctly after.
 
