@@ -4,10 +4,14 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.android.synthetic.main.loading_dialog.*
+import studios.devs.mobi.R
 import studios.devs.mobi.model.Screen
 import java.io.Serializable
 
@@ -18,6 +22,7 @@ open class BaseActivity : AppCompatActivity() {
 
     companion object {
         const val PARAM_DATA = "data"
+        var LOADING_DIALOG_IS_INITIALISED = false
     }
 
     val compositeDisposable = CompositeDisposable()
@@ -59,19 +64,28 @@ open class BaseActivity : AppCompatActivity() {
         errorDialog.create().show()
     }
 
-    var loadingDialog: Dialog? = null
+    lateinit var loadingDialog: Dialog
 
     fun renderLoading(shouldShow: Boolean){
-        //FIXME Temporary solution
-        if (loadingDialog == null && shouldShow){
-//            loadingDialog = Dialog(this, R.style.LoadingDialogStyle)
-//            loadingDialog?.setContentView(R.layout.dialog_loading)
-//            loadingDialog?.findViewById<TextView>(R.id.loading_text)?.text = getString(R.string.loading)
-            loadingDialog?.show()
+        initialiseLoadingDialog()
+        if (shouldShow){
+            loadingDialog.show()
         }
         if (!shouldShow){
-            loadingDialog?.dismiss()
-            loadingDialog = null
+            loadingDialog.dismiss()
+        }
+    }
+
+    private fun initialiseLoadingDialog(){
+        if (!LOADING_DIALOG_IS_INITIALISED){
+            loadingDialog = Dialog(this)
+            loadingDialog.setContentView(R.layout.loading_dialog)
+            loadingDialog.setCancelable(false)
+            loadingDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+            Glide.with(this)
+                    .load(R.drawable.go_loading)
+                    .into(loadingDialog.loading_gif)
+            LOADING_DIALOG_IS_INITIALISED = true
         }
     }
 
