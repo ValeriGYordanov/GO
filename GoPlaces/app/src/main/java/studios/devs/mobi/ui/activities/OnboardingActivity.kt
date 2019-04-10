@@ -109,7 +109,7 @@ private fun OnboardingViewModelInputOutput.bind(activity: OnboardingActivity): L
 private fun ActivityOnboardingBinding.configureWith(activity: OnboardingActivity): List<Disposable> {
     return listOf(
             //binding.
-            this.btnGoOnline.rxClick.subscribe { activity.goOnline() }
+            this.btnGoOnline.rxClick.subscribe { activity.renderLoading(true) }
     )
 }
 
