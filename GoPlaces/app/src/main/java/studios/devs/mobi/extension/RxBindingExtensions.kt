@@ -8,9 +8,14 @@ import com.jakewharton.rxbinding2.view.RxView
 import com.jakewharton.rxbinding2.widget.RxAdapterView
 import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import java.util.concurrent.TimeUnit
 
 var View.rxClick: Observable<Unit>
-    get() = RxView.clicks(this).map { Unit }
+    get() = RxView.clicks(this)
+            .throttleFirst(2, TimeUnit.SECONDS)
+            .map { Unit }
+            .observeOn(AndroidSchedulers.mainThread())
     set(value) {}
 
 var EditText.rxTextChanges: Observable<String>
