@@ -3,6 +3,7 @@ package studios.devs.mobi.ui.activities
 import android.Manifest
 import android.app.Dialog
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
@@ -19,6 +20,7 @@ import studios.devs.mobi.R
 import studios.devs.mobi.databinding.ActivityOnboardingBinding
 import studios.devs.mobi.extension.addTo
 import studios.devs.mobi.extension.rxClick
+import studios.devs.mobi.model.Screen
 import studios.devs.mobi.viewmodels.OnboardingViewModel
 import studios.devs.mobi.viewmodels.OnboardingViewModelInput
 import studios.devs.mobi.viewmodels.OnboardingViewModelInputOutput
@@ -109,7 +111,11 @@ private fun OnboardingViewModelInputOutput.bind(activity: OnboardingActivity): L
 private fun ActivityOnboardingBinding.configureWith(activity: OnboardingActivity): List<Disposable> {
     return listOf(
             //binding.
-            this.btnGoOnline.rxClick.subscribe { activity.goOnline() }
+            this.btnGoOnline.rxClick.subscribe {
+                activity.renderLoading(true)
+                activity.startActivityByNameWithParams(Screen.Online(null))
+                activity.renderLoading(false)
+            }
     )
 }
 
